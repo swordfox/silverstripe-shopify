@@ -67,4 +67,5 @@ The following webhooks are supported.
 
 ### Set up delete_on_shopify
 You can run the delete on Shopify script manually trough the dev/tasks interface or set up up to run as a cron task. This task is useful for stores that sell one-off products and want to delete the products off Shopify after a certain period of time `delete_on_shopify_after: '+3 days'` which is set on ShopifyProduct::DeleteOnShopify during the import tasks if `delete_on_shopify: true`
+
 `http://example.com/dev/tasks/Swordfox-Shopify-Task-DeleteOnShopify` or `sake dev/tasks/Swordfox-Shopify-Task-DeleteOnShopify`
