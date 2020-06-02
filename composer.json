@@ -20,11 +20,14 @@
 		"guzzlehttp/guzzle": "*",
 		"symbiote/silverstripe-gridfieldextensions": "^3"
 	},
-	"extra": {
-		"expose": [
-			"images"
-		]
-	},
+    "extra": {
+        "expose": [
+            "images"
+        ],
+		"branch-alias": {
+			"dev-master": "1.0.x-dev"
+		}
+    },
 	"autoload": {
 		"psr-4": {
 			"Swordfox\\Shopify\\": "src"
