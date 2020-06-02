@@ -31,7 +31,7 @@ class ProductAdmin extends ModelAdmin
 
     private static $menu_title = 'Shopify';
 
-    private static $menu_icon = 'silverstripe-shopify/images/shopify_glyph.svg';
+    private static $menu_icon = 'vendor/swordfox/silverstripe-shopify/images/shopify_glyph.svg';
 
     public function getEditForm($id = null, $fields = null)
     {
