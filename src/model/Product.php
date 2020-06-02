@@ -226,6 +226,11 @@ class Product extends DataObject
         return DataObject::get_one(self::class, ['URLSegment' => $urlSegment]);
     }
 
+    public function URLEncode($url='')
+    {
+        return urlencode($url);
+    }
+
     public function canView($member = null)
     {
         return true;

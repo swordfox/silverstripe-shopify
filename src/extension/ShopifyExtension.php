@@ -43,7 +43,7 @@ use SilverStripe\ORM\DB;
 
          do {
              $word = current($splitWords);
-             if ($word[1] == '"') {
+             if (strlen($word) > 1 and $word[1] == '"') {
                  while (next($splitWords) !== false) {
                      $subword = current($splitWords);
                      $word .= ' ' . $subword;

@@ -12,7 +12,7 @@ Name: shopify
 #  delete_on_shopify_after: '+3 days' # strtotime('+3 days')
 #  hide_out_of_stock: false
 
-PageController:
+Swordfox\Shopify\Model\ShopifyPageController:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
 
