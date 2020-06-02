@@ -1,0 +1,25 @@
+---
+Name: shopify
+---
+#Swordfox\Shopify\Client:
+#  api_key: ''
+#  api_password: ''
+#  storefront_access_token: ''
+#  shopify_domain: ''
+#  shared_secret: ''
+#  webhooks_shared_secret: ''
+#  delete_on_shopify: false
+#  delete_on_shopify_after: '+3 days' # strtotime('+3 days')
+#  hide_out_of_stock: false
+
+PageController:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension
+
+Swordfox\Shopify\Task\Import:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension
+
+Swordfox\Shopify\Task\DeleteOnShopify:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension
