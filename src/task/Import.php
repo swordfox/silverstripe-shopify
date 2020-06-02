@@ -10,9 +10,6 @@ use SilverStripe\Dev\BuildTask;
 
 use Swordfox\Shopify\Client;
 
-use SilverStripe\Dev\Debug;
-use SilverStripe\Dev\Backtrace;
-
 /**
  * Class Import
  *
@@ -26,26 +23,10 @@ class Import extends BuildTask
 
     protected $enabled = true;
 
+    public $api_limit;
+
     public function run($request)
     {
-        $productsonly = false;
-
-        $urlParts = explode('/', $_SERVER['REQUEST_URI']);
-
-        // Cron
-        if (isset($urlParts[3]) and $urlParts[3]=='productsonly') {
-            $productsonly = true;
-        }
-
-        // Browser
-        if (isset($urlParts[4]) and $urlParts[4]=='productsonly') {
-            $productsonly = true;
-        }
-
-        if (!Director::is_cli()) {
-            echo "<pre>";
-        }
-
         try {
             $client = new Client();
         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
@@ -54,13 +35,35 @@ class Import extends BuildTask
             exit($e->getMessage());
         }
 
+        if (!$client->api_limit = $client::config()->get('api_limit')) {
+            $client->api_limit = 50;
+        }
+
+        $productsonly = false;
+        $productsall = false;
+
+        $urlParts = explode('/', $_SERVER['REQUEST_URI']);
+        $urlPartsCheckIndex = (Director::is_cli() ? 3 : 4); // Cron or Browser
+
+        if (isset($urlParts[$urlPartsCheckIndex])) {
+            if ($urlParts[$urlPartsCheckIndex]=='productsonly') {
+                $productsonly = true;
+            } elseif ($urlParts[$urlPartsCheckIndex]=='productsall') {
+                $productsall = true;
+                $client->api_limit = 250; // Set to maximum API limit
+            }
+        }
+
+        if (!Director::is_cli()) {
+            echo "<pre>";
+        }
+
         if ($productsonly) {
             $this->importProducts($client);
         } else {
             $this->importCollections($client, 'custom_collections');
             $this->importCollections($client, 'smart_collections');
-            $this->importProducts($client);
-            $this->importCollects($client);
+            $this->importProducts($client, $productsall);
         }
 
         if (!Director::is_cli()) {

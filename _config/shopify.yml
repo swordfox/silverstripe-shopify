@@ -4,6 +4,7 @@ Name: shopify
 #Swordfox\Shopify\Client:
 #  api_key: ''
 #  api_password: ''
+#  api_limit: 50
 #  storefront_access_token: ''
 #  shopify_domain: ''
 #  shared_secret: ''

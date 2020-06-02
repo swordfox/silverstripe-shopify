@@ -13,8 +13,6 @@ use Swordfox\Shopify\Model\Product;
 use Swordfox\Shopify\Model\ProductVariant;
 use Swordfox\Shopify\Model\ProductTag;
 
-use SilverStripe\ORM\DB;
-
 /**
  * Class ShopifyExtension
  *
@@ -66,29 +64,26 @@ use SilverStripe\ORM\DB;
       *
       * @throws \Exception
       */
-     public function importProducts(Client $client, $since_id=0)
+     public function importProducts(Client $client, $all=false, $since_id=0)
      {
          try {
-             $products = $client->products($since_id);
+             $products = $client->products($since_id, $all);
          } catch (\GuzzleHttp\Exception\GuzzleException $e) {
              exit($e->getMessage());
          }
 
          if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
              foreach ($products->products as $shopifyProduct) {
-                 $this->importProduct($shopifyProduct);
+                 $this->importProduct($shopifyProduct, $client);
              }
 
-             // Disable cycle through all, using updated_at+desc
-             /*
-             if (count($products->products)) {
-                 $this->importProducts($client, $shopifyProduct->id);
+             if (count($products->products) and $all) {
+                 $this->importProducts($client, $all, $shopifyProduct->id);
              }
-             */
          }
      }
 
-     public function importProduct($shopifyProduct)
+     public function importProduct($shopifyProduct, $client=null)
      {
          $delete_on_shopify = Client::config()->get('delete_on_shopify');
          $delete_on_shopify_after = Client::config()->get('delete_on_shopify_after');
@@ -178,6 +173,27 @@ use SilverStripe\ORM\DB;
                  }
              }
 
+             // If called from webhook, initiate $client
+             if (!$client) {
+                 try {
+                     $client = new Client();
+                 } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+                     exit($e->getMessage());
+                 } catch (\Exception $e) {
+                     exit($e->getMessage());
+                 }
+             }
+
+             $currentcollections = $product->Collections();
+             $allcollections = $this->importCollects($client, $shopifyProduct->id);
+
+             // Remove any collections that have been deleted.
+             foreach ($currentcollections as $currentcollection) {
+                 if (!in_array($currentcollection->ID, $allcollections)) {
+                     $product->Collections()->remove($currentcollection);
+                 }
+             }
+
              $product->write();
 
              // Publish the product and it's connections
@@ -229,54 +245,36 @@ use SilverStripe\ORM\DB;
       *
       * @throws \SilverStripe\ORM\ValidationException
       */
-     public function importCollects(Client $client, $since_id=0, $product_id=0)
+     public function importCollects(Client $client, $product_id)
      {
          try {
-             $collects = $client->collects($since_id, $product_id);
+             $collects = $client->collects($product_id);
          } catch (\GuzzleHttp\Exception\GuzzleException $e) {
              exit($e->getMessage());
          }
 
+         $allcollections = [];
+
          if (($collects = $collects->getBody()->getContents()) && $collects = Convert::json2obj($collects)) {
-             if ($since_id==0 and $product_id==0) {
-                 DB::query('TRUNCATE TABLE ShopifyCollection_Products;');
-                 DB::query('ALTER TABLE ShopifyCollection_Products AUTO_INCREMENT = 0');
-             }
-
              foreach ($collects->collects as $shopifyCollect) {
-                 $this->importCollect($shopifyCollect);
-             }
+                 if (
+                     ($collection = Collection::getByShopifyID($shopifyCollect->collection_id))
+                     && ($product = Product::getByShopifyID($shopifyCollect->product_id))
+                 ) {
+                     $collection->Products()->add($product, [
+                         'ShopifyID' => $shopifyCollect->id,
+                         'SortValue' => $shopifyCollect->sort_value,
+                         'Position' => $shopifyCollect->position,
+                         'Featured' => $shopifyCollect->featured
+                     ]);
+                     self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
 
-             if (count($collects->collects)) {
-                 $this->importCollects($client, $shopifyCollect->id);
+                     array_push($allcollections, $collection->ID);
+                 }
              }
          }
-     }
 
-     public function importCollect($shopifyCollect)
-     {
-         if (
-             ($collection = Collection::getByShopifyID($shopifyCollect->collection_id))
-             && ($product = Product::getByShopifyID($shopifyCollect->product_id))
-         ) {
-             /*
-             $currentproducts = $collection->Products()->toArray();
-             $allproducts = [];
-
-             echo "<pre>";
-             print_r($collection->Title);
-             print_r($collection->Products()->toArray());
-             echo "</pre>";
-             */
-
-             $collection->Products()->add($product, [
-                 'ShopifyID' => $shopifyCollect->id,
-                 'SortValue' => $shopifyCollect->sort_value,
-                 'Position' => $shopifyCollect->position,
-                 'Featured' => $shopifyCollect->featured
-             ]);
-             self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
-         }
+         return $allcollections;
      }
 
      /**

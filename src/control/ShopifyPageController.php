@@ -41,9 +41,9 @@ class ShopifyPageController extends \PageController
     {
         parent::init();
 
-        $this->hide_out_of_stock = \Swordfox\Shopify\Client::config()->get('hide_out_of_stock');
-        $this->shopify_domain = \Swordfox\Shopify\Client::config()->get('shopify_domain');
-        $this->storefront_access_token = \Swordfox\Shopify\Client::config()->get('storefront_access_token');
+        $this->hide_out_of_stock = Client::config()->get('hide_out_of_stock');
+        $this->shopify_domain = Client::config()->get('shopify_domain');
+        $this->storefront_access_token = Client::config()->get('storefront_access_token');
     }
 
     public function index()
@@ -247,18 +247,6 @@ class ShopifyPageController extends \PageController
             if (property_exists($vars, 'id')) {
                 if ($type == 'product') {
                     $this->importProduct($vars);
-
-                    $product_id = $vars->id;
-
-                    try {
-                        $client = new Client();
-                    } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-                        exit($e->getMessage());
-                    } catch (\Exception $e) {
-                        exit($e->getMessage());
-                    }
-
-                    $this->importCollects($client, $since_id=0, $product_id);
                 } elseif ($type == 'collection') {
                     $this->importCollection($vars);
                 }
@@ -323,7 +311,7 @@ class ShopifyPageController extends \PageController
 
     public function webhook_verify($data, $hmac_header)
     {
-        $webhooks_shared_secret = \Swordfox\Shopify\Client::config()->get('webhooks_shared_secret');
+        $webhooks_shared_secret = Client::config()->get('webhooks_shared_secret');
 
         $calculated_hmac = base64_encode(hash_hmac('sha256', $data, $webhooks_shared_secret, true));
         return hash_equals($hmac_header, $calculated_hmac);

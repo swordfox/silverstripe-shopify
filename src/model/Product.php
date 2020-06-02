@@ -141,8 +141,8 @@ class Product extends DataObject
             ReadonlyField::create('Content'),
             ReadonlyField::create('Vendor'),
             ReadonlyField::create('ProductType'),
-            ReadonlyField::create('Tags'),
-            UploadField::create('Image')->performReadonlyTransformation(),
+            ReadonlyField::create('OriginalSrc', 'Main Image'),
+            ReadonlyField::create('DeleteOnShopify')
         ]);
 
         $fields->addFieldsToTab('Root.Variants', [
@@ -151,6 +151,10 @@ class Product extends DataObject
 
         $fields->addFieldsToTab('Root.Images', [
             GridField::create('Images', 'Images', $this->Images(), GridFieldConfig_RecordViewer::create())
+        ]);
+
+        $fields->addFieldsToTab('Root.Tags', [
+            GridField::create('Tags', 'Tags', $this->Tags(), GridFieldConfig_RecordViewer::create())
         ]);
 
         $fields->removeByName(['LinkTracking','FileTracking']);

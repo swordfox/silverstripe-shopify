@@ -45,6 +45,11 @@ class Client
     private static $shared_secret = null;
 
     /**
+     * @config null|int
+     */
+    public $api_limit = null;
+
+    /**
      * @var \GuzzleHttp\Client|null
      */
     protected $client = null;
@@ -57,9 +62,9 @@ class Client
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function products($since_id)
+    public function products($since_id, $all)
     {
-        return $this->client->request('GET', 'admin/products.json?order=updated_at+desc&limit=50'.($since_id ? ('&since_id='.$since_id) : ''));
+        return $this->client->request('GET', 'admin/products.json?limit='.$this->api_limit.($all ? '' : '&order=updated_at+desc').(($since_id or $all) ? ('&since_id='.$since_id) : ''));
     }
 
     /**
@@ -72,14 +77,14 @@ class Client
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function product($productId)
+    public function product($product_id)
     {
-        return $this->client->request('GET', "admin/products/$productId.json");
+        return $this->client->request('GET', "admin/products/$product_id.json");
     }
 
-    public function deleteProduct($productId)
+    public function deleteProduct($product_id)
     {
-        return $this->client->request('DELETE', "admin/products/$productId.json");
+        return $this->client->request('DELETE', "admin/products/$product_id.json");
     }
 
     /**
@@ -90,7 +95,7 @@ class Client
      */
     public function collections($type)
     {
-        return $this->client->request('GET', 'admin/'.$type.'.json');
+        return $this->client->request('GET', 'admin/'.$type.'.json?limit='.$this->api_limit);
     }
 
     /**
@@ -99,9 +104,9 @@ class Client
      * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function collects($since_id, $product_id)
+    public function collects($product_id)
     {
-        return $this->client->request('GET', 'admin/collects.json?order=updated_at+desc&limit=250'.($since_id ? ('&since_id='.$since_id) : '').($product_id ? ('&product_id='.$product_id) : ''));
+        return $this->client->request('GET', 'admin/collects.json?order=updated_at+desc&limit='.$this->api_limit.'&product_id='.$product_id);
     }
 
     /**
