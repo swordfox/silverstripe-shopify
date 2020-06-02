@@ -1,5 +1,8 @@
 # Simple shopify module for SilverStripe sites
 This module is for users that want to implement there shopify products into a SilverStripe storefront.
+
+Based on https://github.com/xddesigners/silverstripe-shopify - but completely reworked.
+
 It makes use of the [Shopify Buy Button](https://www.shopify.com/buy-button) to create the cart and checkout interface.   
 You'll end up with a import job that fetches all the products and variants and stores them as Product DataObject in your site.
 

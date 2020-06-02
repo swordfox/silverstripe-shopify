@@ -12,7 +12,8 @@
         }
     ],
 	"require": {
-		"silverstripe/framework": "4.x",
+		"silverstripe/recipe-plugin": "^1",
+        "silverstripe/recipe-cms": "^4",
 		"composer/installers": "*",
 		"guzzlehttp/guzzle": "*",
 		"symbiote/silverstripe-gridfieldextensions": "^3"
