@@ -1,45 +1,26 @@
 <% if $MoreThanOnePage %>
-    <ul class="pagination">
+<div id="PageNumbers">
+    <div class="pagination">
         <% if $NotFirstPage %>
-            <li class="pagination__item pagination__item--link pagination__item--prev">
-                <a href="{$PrevLink}" class="pagination__arrow pagination__arrow--left button small white"><i class="fa fa-angle-left"></i></a>
-            </li>
-        <% else %>
-            <li class="pagination__item pagination__item--current pagination__item--prev">
-                <span class="pagination__arrow pagination__arrow--current pagination__arrow--left button small white"><i class="fa fa-angle-left"></i></span>
-            </li>
+        <a class="prev" href="$PrevLink" title="View the previous page">&larr;</a>
         <% end_if %>
-
-        <% loop $PaginationSummary(3) %>
+        <span>
+            <% loop $PaginationSummary(3) %>
             <% if $CurrentBool %>
-                <li class="pagination__item pagination__item--current">
-                    <span class="button small">$PageNum</span>
-                </li>
+            <a href="$Link" title="View page number $PageNum" class="go-to-page">$PageNum</a>
             <% else %>
-                <% if $Link %>
-                    <li class="pagination__item pagination__item--link">
-                        <a href="$Link" class="button small white">$PageNum</a>
-                    </li>
-                <% else %>
-                    <li class="pagination__item pagination__item--hellip">
-                        <span class="button small white">&hellip;</span>
-                    </li>
-                <% end_if %>
+            <% if $Link %>
+            <a href="$Link" title="View page number $PageNum" class="go-to-page">$PageNum</a>
+            <% else %>
+            <span class="button small white">&hellip;</span>
             <% end_if %>
-        <% end_loop %>
-
+            <% end_if %>
+            <% end_loop %>
+        </span>
         <% if $NotLastPage %>
-            <li class="pagination__item pagination__item--link pagination__item--next">
-                <a href="{$BaseHref}{$NextLink}"
-                   class="pagination__arrow pagination__arrow--right button small white"
-                   id="loop-slice-last-{$ID}">
-                    <i class="fa fa-angle-right"></i>
-                </a>
-            </li>
-        <% else %>
-            <li class="pagination__item pagination__item--current pagination__item--next">
-                <span class="pagination__arrow pagination__arrow--current pagination__arrow--right button small white"><i class="fa fa-angle-right"></i></span>
-            </li>
+        <a class="next" href="$NextLink" title="View the next page">&rarr;</a>
         <% end_if %>
-    </ul>
+    </div>
+    <p>Page $CurrentPage of $TotalPages</p>
+</div>
 <% end_if %>

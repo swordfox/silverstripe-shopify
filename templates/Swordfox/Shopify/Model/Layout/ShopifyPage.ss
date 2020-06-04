@@ -1,26 +1,20 @@
-<section class="grid-container">
-    <header class="grid-x grid-padding-x">
-        <div class="cell">
-            <h3>$Title</h3>
-            $Content
-        </div>
-    </header>
+<div class="content-container unit size3of4 lastUnit">
+    <article>
+        <h1>$Title</h1>
+        <div class="content">$Content</div>
 
-    <article class="grid-container">
         <% if $AllProducts %>
-        <section class="grid-x grid-padding-x small-2 medium-up-3 large-up-4">
+        <section class="content center unit size1of1 lastUnit">
             <% loop $AllProducts %>
             <% include Swordfox\\Shopify\\Product %>
             <% end_loop %>
         </section>
+
+        <section class="content center unit size1of1 lastUnit">
+            <% with $AllProducts %>
+            <% include Swordfox\\Shopify\\Pagination %>
+            <% end_with %>
+        </section>
         <% end_if %>
     </article>
-
-    <% with $AllProducts %>
-    <footer class="grid-x grid-padding-x">
-        <div class="cell">
-            <% include Swordfox\\Shopify\\Pagination %>
-        </div>
-    </footer>
-    <% end_with %>
-</section>
+</div>

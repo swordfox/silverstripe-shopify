@@ -1,4 +1,4 @@
-<div class="product">
+<div class="unit size1of3" style="display: flex">
     <a href="$Link">
         <div class="image">
             <img src="https://images.weserv.nl/?w=272&amp;url={$URLEncode($OriginalSrc)}" alt="$Title">
