@@ -24,3 +24,7 @@ Swordfox\Shopify\Task\Import:
 Swordfox\Shopify\Task\DeleteOnShopify:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
+
+Swordfox\Shopify\Model\Product:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension

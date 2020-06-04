@@ -28,7 +28,6 @@ class ShopifyPageController extends \PageController
         'collection',
         'webhook_delete',
         'webhook_update',
-        'search',
         'googlefeed'
     ];
 
@@ -52,76 +51,6 @@ class ShopifyPageController extends \PageController
             return $this->customise(array('Ajax'=>1))->renderwith('Swordfox/Shopify/Includes/AllProductsInner');
         } else {
             return array();
-        }
-    }
-
-    public function search()
-    {
-        $this->searchactive = true;
-        $request = $this->getRequest();
-        $this->start = ($request->getVar('start') ? $request->getVar('start') : 0);
-
-        $keywords = Convert::raw2sql(trim($request->getVar('keyword')));
-        $keywordssafe = $keywords;
-
-        if (empty($keywords) or strlen($keywords) < 3) {
-            $AllProducts = ArrayList::create();
-
-            $this->Title = 'Search';
-            $this->MetaTitle = "Search";
-            $this->Content = "<p>No results, please enter a search term 3 or more characters long.</p>";
-        } else {
-            $andProcessor = function ($matches) {
-                return " +" . $matches[2] . " +" . $matches[4] . " ";
-            };
-
-            $notProcessor = function ($matches) {
-                return " -" . $matches[3];
-            };
-
-            $keywords = preg_replace_callback('/()("[^()"]+")( and )("[^"()]+")()/i', $andProcessor, $keywords);
-            $keywords = preg_replace_callback('/(^| )([^() ]+)( and )([^ ()]+)( |$)/i', $andProcessor, $keywords);
-            $keywords = preg_replace_callback('/(^| )(not )("[^"()]+")/i', $notProcessor, $keywords);
-            $keywords = preg_replace_callback('/(^| )(not )([^() ]+)( |$)/i', $notProcessor, $keywords);
-
-            $keywords = $this->addStarsToKeywords($keywords);
-
-            $Products = Product::get()
-                ->filterAny(
-                    'SearchFields:Fulltext',
-                    $keywords
-                );
-
-
-            if ($this->hide_out_of_stock) {
-                $Products = $Products->innerJoin('ShopifyProductVariant', 'ShopifyProductVariant.ProductID = ShopifyProduct.ID AND Inventory > 0');
-            }
-
-            $SearchCount = $Products->count();
-
-            $this->ItemsLeft = $SearchCount - ($this->start + $this->PageLimit);
-
-            $this->Title = 'Search';
-            $this->MetaTitle = "Search - '".$keywordssafe."'";
-            $this->Content = "<p>Your search for '<em>{$keywordssafe}</em>' returned {$SearchCount} result".($SearchCount == 1 ? '' : 's')."</p>";
-
-            $AllProducts = PaginatedList::create(
-                $Products,
-                $request
-            )->setPageLength($this->PageLimit);
-        }
-
-        if (Director::is_ajax() or $this->request->getVar('Ajax')=='1') {
-            return $this->customise(array('AllProducts'=>$AllProducts,'Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet, 'start'=>$this->start))->renderwith('Swordfox/Shopify/Includes/AllProductsInner');
-        } else {
-            return $this->customise(array('AllProducts'=>$AllProducts));
-        }
-    }
-
-    public function GiftVoucher()
-    {
-        if ($GiftVoucher = Product::get()->filter(array('ProductType'=>'Gift Card'))->first()) {
-            return $GiftVoucher;
         }
     }
 
@@ -262,8 +191,8 @@ class ShopifyPageController extends \PageController
             }
         }
 
-        $file = 'webhook_'.$type.'_update.txt';
-        file_put_contents($file, $data);
+        //$file = 'webhook_'.$type.'_update.txt';
+        //file_put_contents($file, $data);
     }
 
     public function webhook_delete(HTTPRequest $request)

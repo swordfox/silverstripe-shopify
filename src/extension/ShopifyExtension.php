@@ -29,35 +29,6 @@ use Swordfox\Shopify\Model\ProductTag;
      const WARN = 2;
      const ERROR = 3;
 
-     public function addStarsToKeywords($keywords)
-     {
-         $keywords = trim($keywords);
-         if (!$keywords) {
-             return "";
-         }
-
-         $splitWords = explode(" ", $keywords);
-         $newWords = [];
-
-         do {
-             $word = current($splitWords);
-             if (strlen($word) > 1 and $word[1] == '"') {
-                 while (next($splitWords) !== false) {
-                     $subword = current($splitWords);
-                     $word .= ' ' . $subword;
-                     if (substr($subword, -1) == '"') {
-                         break;
-                     }
-                 }
-             } else {
-                 $word .= '*';
-             }
-             $newWords[] = $word;
-         } while (next($splitWords) !== false);
-
-         return implode(" ", $newWords);
-     }
-
      /**
       * Import the shopify products
       * @param Client $client
@@ -90,89 +61,6 @@ use Swordfox\Shopify\Model\ProductTag;
 
          // Create the product
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
-             $currentimages = $product->Images();
-             $allimages = [];
-
-             // Create the images
-             if (!empty($shopifyProduct->images)) {
-                 $i = 0;
-                 foreach ($shopifyProduct->images as $shopifyImage) {
-                     array_push($allimages, $shopifyImage->src);
-
-                     if ($i == 0) {
-                         $product->OriginalSrc = $shopifyImage->src;
-                     }
-
-                     if (!$ExistingImage = ShopifyImage::get()->where("OriginalSrc='{$shopifyImage->src}'")->first()) {
-                         if ($image = $this->importObject(ShopifyImage::class, $shopifyImage)) {
-                             $product->Images()->add($image);
-                         }
-                     }
-
-                     $i++;
-                 }
-             }
-
-             // Remove any images that have been deleted.
-             foreach ($currentimages as $currentimage) {
-                 if (!in_array($currentimage->OriginalSrc, $allimages)) {
-                     $product->Images()->remove($currentimage);
-                 }
-             }
-
-             // Create the variants
-             $currentvariants = $product->Variants();
-             $allvariants = [];
-
-             if (!empty($shopifyProduct->variants)) {
-                 foreach ($shopifyProduct->variants as $shopifyVariant) {
-                     // Delete if inventory_quantity = 0 and after 3 days based on updated_at 'I hope'
-                     if (count($shopifyProduct->variants)==1 and $delete_on_shopify) {
-                         if ($shopifyVariant->inventory_quantity == 0 and $shopifyVariant->inventory_management == 'shopify' and ($product->DeleteOnShopify == '0000-00-00' or $product->DeleteOnShopify == '')) {
-                             $product->DeleteOnShopify = date('Y-m-d', strtotime($delete_on_shopify_after));
-                         } elseif ($shopifyVariant->inventory_quantity > 0) {
-                             $product->DeleteOnShopify = '0000-00-00';
-                         }
-                     }
-
-                     array_push($allvariants, $shopifyVariant->id);
-
-                     if ($variant = $this->importObject(ProductVariant::class, $shopifyVariant)) {
-                         $product->Variants()->add($variant);
-                     }
-                 }
-             }
-
-             // Remove any variants that have been deleted.
-             foreach ($currentvariants as $currentvariant) {
-                 if (!in_array($currentvariant->ShopifyID, $allvariants)) {
-                     $product->Variants()->remove($currentvariant);
-                 }
-             }
-
-             // Create the tags
-             $currenttags = $product->Tags();
-             $alltags = [];
-
-             if (!empty($product->Tags)) {
-                 $shopifyTags = array_map('trim', explode(',', $product->Tags));
-
-                 foreach ($shopifyTags as $shopifyTag) {
-                     array_push($alltags, $shopifyTag);
-
-                     if ($tag = $this->importObject(ProductTag::class, $shopifyTag)) {
-                         $product->Tags()->add($tag);
-                     }
-                 }
-             }
-
-             // Remove any tags that have been deleted.
-             foreach ($currenttags as $currenttag) {
-                 if (!in_array($currenttag->Title, $alltags)) {
-                     $product->Tags()->remove($currenttag);
-                 }
-             }
-
              // If called from webhook, initiate $client
              if (!$client) {
                  try {
@@ -227,7 +115,7 @@ use Swordfox\Shopify\Model\ProductTag;
 
      public function importCollection($shopifyCollection)
      {
-         if ($shopifyCollection->published_scope == 'global') {
+         if ($shopifyCollection->published_scope == 'global' or $shopifyCollection->published_scope == 'web') {
              // Create the collection
              if ($collection = $this->importObject(Collection::class, $shopifyCollection)) {
                  // Publish the product and it's connections

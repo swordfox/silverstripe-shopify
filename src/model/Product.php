@@ -19,6 +19,7 @@ use SilverStripe\ORM\Connect\MySQLSchemaManager;
 use SilverStripe\View\Requirements;
 use SilverStripe\ORM\FieldType\DBCurrency;
 use Swordfox\Shopify\Task\Import;
+use Swordfox\Shopify\Client;
 
 /**
  * Class Product
@@ -209,8 +210,93 @@ class Product extends DataObject
      */
     public static function findOrMakeFromShopifyData($shopifyProduct)
     {
+        $delete_on_shopify = Client::config()->get('delete_on_shopify');
+        $delete_on_shopify_after = Client::config()->get('delete_on_shopify_after');
+
         if (!$product = self::getByShopifyID($shopifyProduct->id)) {
             $product = self::create();
+        }
+
+        // Create the images
+        if (!empty($shopifyProduct->images)) {
+            $product->OriginalSrc = $shopifyProduct->images[0]->src;
+        } else {
+            $product->OriginalSrc = '';
+        }
+
+        $currentimages = $product->Images();
+        $allimages = [];
+
+        if (!empty($shopifyProduct->images)) {
+            foreach ($shopifyProduct->images as $shopifyImage) {
+                array_push($allimages, $shopifyImage->src);
+
+                if (!$ExistingImage = ShopifyImage::get()->where("OriginalSrc='{$shopifyImage->src}'")->first()) {
+                    if ($image = $product->importObject(ShopifyImage::class, $shopifyImage)) {
+                        $product->Images()->add($image);
+                    }
+                }
+            }
+        }
+
+        // Remove any images that have been deleted.
+        foreach ($currentimages as $currentimage) {
+            if (!in_array($currentimage->OriginalSrc, $allimages)) {
+                $product->Images()->remove($currentimage);
+            }
+        }
+
+        // Create the variants
+        $currentvariants = $product->Variants();
+        $allvariants = [];
+
+        if (!empty($shopifyProduct->variants)) {
+            foreach ($shopifyProduct->variants as $shopifyVariant) {
+                // Delete if inventory_quantity = 0 and after 3 days based on updated_at 'I hope'
+                if (count($shopifyProduct->variants)==1 and $delete_on_shopify) {
+                    if ($shopifyVariant->inventory_quantity == 0 and $shopifyVariant->inventory_management == 'shopify' and ($product->DeleteOnShopify == '0000-00-00' or $product->DeleteOnShopify == '')) {
+                        $product->DeleteOnShopify = date('Y-m-d', strtotime($delete_on_shopify_after));
+                    } elseif ($shopifyVariant->inventory_quantity > 0) {
+                        $product->DeleteOnShopify = '0000-00-00';
+                    }
+                }
+
+                array_push($allvariants, $shopifyVariant->id);
+
+                if ($variant = $product->importObject(ProductVariant::class, $shopifyVariant)) {
+                    $product->Variants()->add($variant);
+                }
+            }
+        }
+
+        // Remove any variants that have been deleted.
+        foreach ($currentvariants as $currentvariant) {
+            if (!in_array($currentvariant->ShopifyID, $allvariants)) {
+                $product->Variants()->remove($currentvariant);
+            }
+        }
+
+        // Create the tags
+        $currenttags = $product->Tags();
+        $alltags = [];
+
+        if (!empty($shopifyProduct->tags)) {
+            $shopifyTags = array_map('trim', explode(',', $shopifyProduct->tags));
+
+            foreach ($shopifyTags as $shopifyTag) {
+                array_push($alltags, $shopifyTag);
+
+                if ($tag = $product->importObject(ProductTag::class, $shopifyTag)) {
+                    $product->Tags()->add($tag);
+                }
+            }
+        }
+
+        // Remove any tags that have been deleted.
+        foreach ($currenttags as $currenttag) {
+            if (!in_array($currenttag->Title, $alltags)) {
+                $product->Tags()->remove($currenttag);
+            }
         }
 
         $map = self::config()->get('data_map');

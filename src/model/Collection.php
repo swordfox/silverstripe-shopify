@@ -49,6 +49,7 @@ class Collection extends DataObject
         'URLSegment' => 'Varchar',
         'ShopifyID' => 'Varchar',
         'Content' => 'HTMLText',
+        'OriginalSrc' => 'Varchar',
         'SortOrder' => 'Int',
         'Active' => 'Boolean(1)'
     ];
@@ -94,6 +95,7 @@ class Collection extends DataObject
             ReadonlyField::create('URLSegment'),
             ReadonlyField::create('ShopifyID'),
             ReadonlyField::create('Content'),
+            ReadonlyField::create('OriginalSrc'),
             UploadField::create('Image')->performReadonlyTransformation(),
         ]);
 
@@ -135,6 +137,10 @@ class Collection extends DataObject
     {
         if (!$collection = self::getByShopifyID($shopifyCollection->id)) {
             $collection = self::create();
+        }
+
+        if (!empty($shopifyCollection->image)) {
+            $collection->OriginalSrc = $shopifyCollection->image->src;
         }
 
         $map = self::config()->get('data_map');

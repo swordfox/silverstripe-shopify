@@ -28,7 +28,7 @@ class ShopifyPage extends \Page
     ];
 
     private static $defaults = [
-        'PageLimit' => 10
+        'PageLimit' => 9
     ];
 
     public function Collections()
