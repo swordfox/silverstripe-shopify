@@ -6,6 +6,8 @@ Based on [xddesigners/silverstripe-shopify](https://github.com/xddesigners/silve
 * Collections are added / removed on a per product basis.
 * Import task with options: default, productsonly & productsall (See 'Set up import script' below).
 * Buy Button scripts included in templates to make it easy to modify & implement in your own way.
+* Versioning removed.
+* Images are not imported from Shopify, instead we use [Images.weserv.nl](https://images.weserv.nl/) - An image cache & resize service.
 * Optional: Webhooks from Shopify to keep your store updated without having to rely on the import task which can be resource consuming (See 'Set up webhooks' below).
 * Optional: delete_on_shopify for shops that want to delete their products from Shopify after they have been sold, useful for shops that have one-off products (See 'Set up delete_on_shopify' below).
 
