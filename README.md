@@ -39,6 +39,7 @@ Swordfox\Shopify\Client:
   delete_on_shopify: false
   delete_on_shopify_after: '+3 days' # strtotime('+3 days')
   hide_out_of_stock: false
+  hide_if_no_image: false
 ```
 
 ### Set up import script

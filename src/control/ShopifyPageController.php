@@ -21,6 +21,7 @@ class ShopifyPageController extends \PageController
 {
     public $start;
     public $hide_out_of_stock;
+    public $hide_if_no_image;
     public $storefront_access_token;
 
     private static $allowed_actions = [
@@ -41,6 +42,7 @@ class ShopifyPageController extends \PageController
         parent::init();
 
         $this->hide_out_of_stock = Client::config()->get('hide_out_of_stock');
+        $this->hide_if_no_image = Client::config()->get('hide_if_no_image');
         $this->shopify_domain = Client::config()->get('shopify_domain');
         $this->storefront_access_token = Client::config()->get('storefront_access_token');
     }
@@ -60,6 +62,10 @@ class ShopifyPageController extends \PageController
         $this->start = ($request->getVar('start') ? $request->getVar('start') : 0);
 
         $Products = Product::get();
+
+        if ($this->hide_if_no_image) {
+            $Products = $Products->where('OriginalSrc IS NOT NULL');
+        }
 
         if ($this->hide_out_of_stock) {
             $Products = $Products->innerJoin('ShopifyProductVariant', 'ShopifyProductVariant.ProductID = ShopifyProduct.ID AND Inventory > 0');
@@ -105,6 +111,10 @@ class ShopifyPageController extends \PageController
             $this->MetaTitle = $Collection->Title.' - Online Shop';
 
             $Products = $Collection->Products();
+        }
+
+        if ($this->hide_if_no_image) {
+            $Products = $Products->where('OriginalSrc IS NOT NULL');
         }
 
         if ($this->hide_out_of_stock) {
