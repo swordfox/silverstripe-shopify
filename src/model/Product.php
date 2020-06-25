@@ -323,6 +323,8 @@ class Product extends DataObject
 
     public function canView($member = null)
     {
-        return true;
+        $this->hide_if_no_image = Client::config()->get('hide_if_no_image');
+
+        return ((!$this->OriginalSrc and $this->hide_if_no_image) ? false : true);
     }
 }

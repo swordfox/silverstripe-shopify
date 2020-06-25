@@ -146,6 +146,10 @@ class ShopifyPageController extends \PageController
             $this->httpError(404);
         }
 
+        if($this->hide_if_no_image and !$product->OriginalSrc){
+            $this->httpError(404);
+        }
+
         $this->productactive = true;
         $this->productselectedurl = $product->Link();
 
