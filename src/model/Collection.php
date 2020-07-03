@@ -19,6 +19,7 @@ use SilverStripe\TagField\TagField;
 use SilverStripe\View\Requirements;
 use SilverStripe\ORM\FieldType\DBCurrency;
 use Swordfox\Shopify\Task\Import;
+use Swordfox\Shopify\Client;
 
 /**
  * Class Collection
@@ -109,9 +110,26 @@ class Collection extends DataObject
 
     public function Tags()
     {
-        return ProductTag::get()
+        $hide_if_no_image = Client::config()->get('hide_if_no_image');
+        $hide_out_of_stock = Client::config()->get('hide_out_of_stock');
+
+        $ProductTags = ProductTag::get()
             ->innerJoin('ShopifyProduct_Tags', 'ShopifyProduct_Tags.ShopifyProductTagID = ShopifyProductTag.ID')
-            ->innerJoin('ShopifyCollection_Products', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyCollection_Products.ShopifyCollectionID = '.$this->ID);
+            ->innerJoin('ShopifyCollection_Products', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyCollection_Products.ShopifyCollectionID = '.$this->ID)
+        ;
+
+        if ($hide_if_no_image) {
+            $ProductTags = $ProductTags->innerJoin('ShopifyProduct', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct.ID AND ShopifyProduct.OriginalSrc IS NOT NULL');
+        }
+
+        /*
+        if ($hide_out_of_stock) {
+            $ProductTags = $ProductTags->innerJoin('ShopifyProduct', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct.ID');
+            $ProductTags = $ProductTags->innerJoin('ShopifyProductVariant', 'ShopifyProductVariant.ProductID = ShopifyProduct.ID AND ShopifyProductVariant.Inventory > 0');
+        }
+        */
+
+        return $ProductTags;
     }
 
     public function Link($action = null)
