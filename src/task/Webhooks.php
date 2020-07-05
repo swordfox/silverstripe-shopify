@@ -28,7 +28,6 @@ class Webhooks extends BuildTask
     public function run($request)
     {
         $baseurl = Director::AbsoluteBaseURL();
-        $baseurl = 'https://www.thewalkinwardrobe.co.nz/';
 
         if (!$webhooks_create = Client::config()->get('webhooks_create')){
             throw new Exception('No webhooks found.');
