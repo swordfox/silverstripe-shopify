@@ -155,7 +155,7 @@ class ShopifyPageController extends \PageController
 
         $this->MetaTitle = $product->Title;
 
-        if (Director::is_ajax() or $this->request->getVar('Ajax')=='1') {
+        if (Director::is_ajax() or $request->getVar('Ajax')=='1') {
             return $product->customise(array('Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet))->renderwith('Swordfox/Shopify/Includes/ProductInner');
         } else {
             return $this->render($product);
@@ -205,8 +205,8 @@ class ShopifyPageController extends \PageController
             }
         }
 
-        //$file = 'webhook_'.$type.'_update.txt';
-        //file_put_contents($file, $data);
+        $file = 'webhook_'.$type.'_update.txt';
+        file_put_contents($file, $data);
     }
 
     public function webhook_delete(HTTPRequest $request)

@@ -110,6 +110,39 @@ class Client
     }
 
     /**
+     * Post the new Webhook
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function createWebhook($data)
+    {
+        return $this->client->request('POST', 'admin/webhooks.json', $data);
+    }
+
+    /**
+     * DELETE a Webhook created via API
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function deleteWebhook($deleteid)
+    {
+        return $this->client->request('DELETE', 'admin/webhooks/'.$deleteid.'.json');
+    }
+
+    /**
+     * GET a list of Webhooks created via API
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getWebhooks()
+    {
+        return $this->client->request('GET', 'admin/webhooks.json');
+    }
+
+    /**
      * Get the configured Guzzle client
      *
      * @throws Exception

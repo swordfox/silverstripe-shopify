@@ -24,7 +24,7 @@ composer require swordfox/silverstripe-shopify
 ```
 
 Get up your api keys by creating a new Private App in your Shopify admin interface.
-If you want to use webhooks, you will need to get your webhooks shared secret from `admin/settings/notifications`
+If you want to use webhooks via the API e.g. dev/tasks/Swordfox-Shopify-Task-Webhooks/create you need to ensure 'webhooks_shared_secret' is the same as 'shared_secret', however if you want to use manually added webhooks, you will need to get your webhooks shared secret from `admin/settings/notifications`
 
 ### Config
 ```yaml
@@ -32,14 +32,22 @@ Swordfox\Shopify\Client:
   api_key: 'YOUR_API_KEY'
   api_password: 'YOUR_API_PASSWORD'
   api_limit: 50 # Default limit, 250 max
-  shared_secret: 'YOUR_API_SHARED_SECRET'
   storefront_access_token: 'YOUR_ACCESS_TOKEN' # for buybutton code
   shopify_domain: 'YOUR_SHOPIFY_DOMAIN' # mydomain.myshopify.com
-  webhooks_shared_secret: 'YOUR_WEBHOOKS_SHARED_SECRET'
+  shared_secret: 'YOUR_API_SHARED_SECRET'
+  webhooks_shared_secret: 'YOUR_WEBHOOKS_SHARED_SECRET' # Use same as above for webhooks added via API e.g. dev/tasks/Swordfox-Shopify-Task-Webhooks/create
+  webhooks_create:
+    'products/update': 'shop/webhook/update/product'
+    'products/create': 'shop/webhook/update/product'
+    'products/delete': 'shop/webhook/delete/product'
+    'collections/create': 'shop/webhook/update/collection'
+    'collections/update': 'shop/webhook/update/collection'
+    'collections/delete': 'shop/webhook/delete/collection'
+    'inventory_levels/connect': 'shop/webhook/update/inventory'
+    'inventory_levels/update': 'shop/webhook/update/inventory'
   delete_on_shopify: false
   delete_on_shopify_after: '+3 days' # strtotime('+3 days')
   hide_out_of_stock: false
-  hide_if_no_image: false
 ```
 
 ### Set up import script
@@ -55,7 +63,7 @@ The productsall task is designed to run on initial set up and imports all from *
 `http://example.com/dev/tasks/Swordfox-Shopify-Task-Import/productsall` or `sake dev/tasks/Swordfox-Shopify-Task-Import/productsall`
 
 ### Set up webhooks
-The following webhooks are supported.
+The following webhooks are supported and can be created automatically via the API using `http://example.com/dev/tasks/Swordfox-Shopify-Task-Webhooks/create` or `sake dev/tasks/Swordfox-Shopify-Task-Webhooks/create`
 
 * Collection creation 	https://www.example.com/shop-page/webhook/update/collection
 * Collection deletion 	https://www.example.com/shop-page/webhook/delete/collection
