@@ -9,7 +9,7 @@ use SilverStripe\Core\Config\Configurable;
  * Class Client
  * @package Swordfox\Shopify
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  */
 class Client
 {

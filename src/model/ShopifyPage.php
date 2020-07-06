@@ -9,7 +9,7 @@ use SilverStripe\ORM\DataObject;
 /**
  * Class ShopifyPage
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  * @package Swordfox\Shopify\Model
  *
  * @property int PageLimit

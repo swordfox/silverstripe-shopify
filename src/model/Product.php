@@ -24,7 +24,7 @@ use Swordfox\Shopify\Client;
 /**
  * Class Product
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  * @package Swordfox\Shopify
  * @subpackage Model
  *

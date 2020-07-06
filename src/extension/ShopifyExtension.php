@@ -16,7 +16,7 @@ use Swordfox\Shopify\Model\ProductTag;
 /**
  * Class ShopifyExtension
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  * @package Swordfox\Shopify\Extension
  *
  * @property ShopifyExtension|\PageController $owner

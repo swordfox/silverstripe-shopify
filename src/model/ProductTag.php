@@ -12,7 +12,7 @@ use Swordfox\Shopify\Task\Import;
 /**
  * Class ProductVariant
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  * @package Swordfox\Shopify\Model
  *
  * @property string Title

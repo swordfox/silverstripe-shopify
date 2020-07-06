@@ -16,7 +16,7 @@ use SilverStripe\Dev\Backtrace;
 /**
  * Class Import
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  */
 class DeleteOnShopify extends BuildTask
 {

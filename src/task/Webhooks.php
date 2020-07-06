@@ -13,7 +13,7 @@ use Swordfox\Shopify\Client;
 /**
  * Class Import
  *
- * @author Bram de Leeuw
+ * @author Graham McLellan
  */
 class Webhooks extends BuildTask
 {
