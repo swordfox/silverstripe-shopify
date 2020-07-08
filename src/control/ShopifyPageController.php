@@ -166,106 +166,125 @@ class ShopifyPageController extends \PageController
      * Shopify webhooks
      */
 
-    public function webhook_update(HTTPRequest $request)
-    {
-        if (!$type = $request->param('Type')) {
-            $this->httpError(404);
-        }
+     public function webhook_update(HTTPRequest $request)
+     {
+         if (!$type = $request->param('Type')) {
+             $this->httpError(404);
+         }
 
-        $hmac_header = $_SERVER['HTTP_X_SHOPIFY_HMAC_SHA256'];
-        $data = file_get_contents('php://input');
-        $verified = $this->webhook_verify($data, $hmac_header);
+         // By default get stored in www-root/public/
+         $file = 'webhook_'.$type.'_update.txt';
 
-        /*
-        // Example Product Data
-        $data = '{"id":4643710664801,"title":"Test product","body_html":"Test product","vendor":"The Walk in Wardrobe","product_type":"","created_at":"2020-05-26T11:01:00+12:00","handle":"test-product","updated_at":"2020-05-26T11:01:01+12:00","published_at":null,"template_suffix":"","published_scope":"global","tags":"","admin_graphql_api_id":"gid:\/\/shopify\/Product\/4643710664801","variants":[{"id":32338683166817,"product_id":4643710664801,"title":"Default Title","price":"1111.00","sku":"","position":1,"inventory_policy":"deny","compare_at_price":null,"fulfillment_service":"manual","inventory_management":"shopify","option1":"Default Title","option2":null,"option3":null,"created_at":"2020-05-26T11:01:00+12:00","updated_at":"2020-05-26T11:01:00+12:00","taxable":true,"barcode":"","grams":0,"image_id":null,"weight":0.0,"weight_unit":"kg","inventory_item_id":34269676896353,"inventory_quantity":1,"old_inventory_quantity":1,"requires_shipping":true,"admin_graphql_api_id":"gid:\/\/shopify\/ProductVariant\/32338683166817"}],"options":[{"id":6037006811233,"product_id":4643710664801,"name":"Title","position":1,"values":["Default Title"]}],"images":[{"id":15214163165281,"product_id":4643710664801,"position":1,"created_at":"2020-05-26T11:01:01+12:00","updated_at":"2020-05-26T11:01:01+12:00","alt":null,"width":630,"height":630,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/5338644_0.jpg?v=1590447661","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/15214163165281"}],"image":{"id":15214163165281,"product_id":4643710664801,"position":1,"created_at":"2020-05-26T11:01:01+12:00","updated_at":"2020-05-26T11:01:01+12:00","alt":null,"width":630,"height":630,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/5338644_0.jpg?v=1590447661","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/15214163165281"}}';
+         $hmac_header = $_SERVER['HTTP_X_SHOPIFY_HMAC_SHA256'];
+         $data = file_get_contents('php://input');
+         $verified = $this->webhook_verify($data, $hmac_header);
 
-        // Example Inventory Data
-        $data = '{"inventory_item_id":34269676896353,"location_id":36167909473,"available":0,"updated_at":"2020-05-26T11:35:10+12:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/70049923169?inventory_item_id=34269676896353"}';
-        $verified = 1;
-        */
+         // Example Product Data
+         /*
+         $data = '{"id":4643710664801,"title":"Test product","body_html":"Test product","vendor":"The Walk in Wardrobe","product_type":"","created_at":"2020-05-26T11:01:00+12:00","handle":"test-product","updated_at":"2020-05-26T11:01:01+12:00","published_at":null,"template_suffix":"","published_scope":"global","tags":"","admin_graphql_api_id":"gid:\/\/shopify\/Product\/4643710664801","variants":[{"id":32338683166817,"product_id":4643710664801,"title":"Default Title","price":"1111.00","sku":"","position":1,"inventory_policy":"deny","compare_at_price":null,"fulfillment_service":"manual","inventory_management":"shopify","option1":"Default Title","option2":null,"option3":null,"created_at":"2020-05-26T11:01:00+12:00","updated_at":"2020-05-26T11:01:00+12:00","taxable":true,"barcode":"","grams":0,"image_id":null,"weight":0.0,"weight_unit":"kg","inventory_item_id":34269676896353,"inventory_quantity":1,"old_inventory_quantity":1,"requires_shipping":true,"admin_graphql_api_id":"gid:\/\/shopify\/ProductVariant\/32338683166817"}],"options":[{"id":6037006811233,"product_id":4643710664801,"name":"Title","position":1,"values":["Default Title"]}],"images":[{"id":15214163165281,"product_id":4643710664801,"position":1,"created_at":"2020-05-26T11:01:01+12:00","updated_at":"2020-05-26T11:01:01+12:00","alt":null,"width":630,"height":630,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/5338644_0.jpg?v=1590447661","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/15214163165281"}],"image":{"id":15214163165281,"product_id":4643710664801,"position":1,"created_at":"2020-05-26T11:01:01+12:00","updated_at":"2020-05-26T11:01:01+12:00","alt":null,"width":630,"height":630,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/5338644_0.jpg?v=1590447661","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/15214163165281"}}';
+         /*
 
-        if ($verified) {
-            $vars = json_decode($data);
-            if (property_exists($vars, 'id')) {
-                if ($type == 'product') {
-                    $this->importProduct($vars);
-                } elseif ($type == 'collection') {
-                    $this->importCollection($vars);
-                }
-            }
+         // Example Inventory Data
+         /*
+         $data = '{"inventory_item_id":34269676896353,"location_id":36167909473,"available":0,"updated_at":"2020-05-26T11:35:10+12:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/70049923169?inventory_item_id=34269676896353"}';
+         */
 
-            if ($type == 'inventory') {
-                if (property_exists($vars, 'inventory_item_id')) {
-                    if ($productvariant = ProductVariant::get()->where('InventoryItemID = '.$vars->inventory_item_id)->first()) {
-                        $productvariant->Inventory = $vars->available;
-                        $productvariant->write();
-                    }
-                }
-            }
-        }
+         //$verified = 1;
 
-        $file = 'webhook_'.$type.'_update.txt';
-        file_put_contents($file, $data);
-    }
+         if ($verified) {
+             $vars = json_decode($data);
 
-    public function webhook_delete(HTTPRequest $request)
-    {
-        if (!$type = $request->param('Type')) {
-            $this->httpError(404);
-        }
+             if (property_exists($vars, 'id')) {
+                 if ($type == 'product') {
+                     if(is_file($file)){
+                         $lastupdate_data = file_get_contents($file);
+                         $lastupdate_vars = json_decode($lastupdate_data);
+                     }
 
-        $hmac_header = $_SERVER['HTTP_X_SHOPIFY_HMAC_SHA256'];
-        $data = file_get_contents('php://input');
-        $verified = $this->webhook_verify($data, $hmac_header);
+                     // Safeguard against webhooks being fired in quick succession, i.e. Within 10 seconds
+                     if($vars->id == $lastupdate_vars->id and (strtotime($vars->updated_at) - strtotime($lastupdate_vars->updated_at)) <= 10){
+                         return;
+                     }
 
-        if ($verified) {
-            $vars = json_decode($data);
-            if (property_exists($vars, 'id')) {
-                $id = $vars->id;
+                     $this->importProduct($vars);
+                 } elseif ($type == 'collection') {
+                     $this->importCollection($vars);
+                 }
+             }
 
-                if ($type == 'product') {
-                    $product = DataObject::get_one(Product::class, ['ShopifyID' => $id]);
+             if ($type == 'inventory') {
+                 if (property_exists($vars, 'inventory_item_id')) {
+                     if ($productvariant = ProductVariant::get()->where('InventoryItemID = '.$vars->inventory_item_id)->first()) {
+                         $productvariant->Inventory = $vars->available;
+                         $productvariant->write();
+                     }
+                 }
+             }
+         }
 
-                    if ($product) {
-                        $status=$product->Title.' deleted.';
-                        $product->delete();
-                    } else {
-                        $status='Not found.';
-                    }
-                } elseif ($type == 'collection') {
-                    $Collection = DataObject::get_one(Collection::class, ['ShopifyID' => $id]);
+         $file = 'webhook_'.$type.'_update.txt';
+         file_put_contents($file, $data);
+     }
 
-                    if ($Collection) {
-                        $status=$Collection->Title.' deleted.';
-                        $Collection->delete();
-                    } else {
-                        $status='Not found.';
-                    }
-                }
-            }
-        } else {
-            $status='Error';
-        }
+     public function webhook_delete(HTTPRequest $request)
+     {
+         if (!$type = $request->param('Type')) {
+             $this->httpError(404);
+         }
 
-        $file = 'webhook_'.$type.'_delete.txt';
-        file_put_contents($file, $data.$status);
-    }
+         // By default get stored in www-root/public/
+         $file = 'webhook_'.$type.'_delete.txt';
 
-    public function webhook_verify($data, $hmac_header)
-    {
-        $webhooks_shared_secret = Client::config()->get('webhooks_shared_secret');
+         $hmac_header = $_SERVER['HTTP_X_SHOPIFY_HMAC_SHA256'];
+         $data = file_get_contents('php://input');
+         $verified = $this->webhook_verify($data, $hmac_header);
 
-        $calculated_hmac = base64_encode(hash_hmac('sha256', $data, $webhooks_shared_secret, true));
-        return hash_equals($hmac_header, $calculated_hmac);
-    }
+         if ($verified) {
+             $vars = json_decode($data);
+             if (property_exists($vars, 'id')) {
+                 $id = $vars->id;
 
-    public function googlefeed()
-    {
-        return $this->customise(
-            array(
-                'Products'=>$this->AllProducts($Paginated=false)
-            )
-        );
-    }
-}
+                 if ($type == 'product') {
+                     $product = DataObject::get_one(Product::class, ['ShopifyID' => $id]);
+
+                     if ($product) {
+                         $status=$product->Title.' deleted.';
+                         $product->delete();
+                     } else {
+                         $status='Not found.';
+                     }
+                 } elseif ($type == 'collection') {
+                     $Collection = DataObject::get_one(Collection::class, ['ShopifyID' => $id]);
+
+                     if ($Collection) {
+                         $status=$Collection->Title.' deleted.';
+                         $Collection->delete();
+                     } else {
+                         $status='Not found.';
+                     }
+                 }
+             }
+         } else {
+             $status='Error';
+         }
+
+         file_put_contents($file, $data.$status);
+     }
+
+     public function webhook_verify($data, $hmac_header)
+     {
+         $webhooks_shared_secret = Client::config()->get('webhooks_shared_secret');
+
+         $calculated_hmac = base64_encode(hash_hmac('sha256', $data, $webhooks_shared_secret, true));
+         return hash_equals($hmac_header, $calculated_hmac);
+     }
+
+     public function googlefeed()
+     {
+         return $this->customise(
+             array(
+                 'Products'=>$this->AllProducts($Paginated=false)
+             )
+         );
+     }
+ }
