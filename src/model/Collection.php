@@ -52,7 +52,7 @@ class Collection extends DataObject
         'Content' => 'HTMLText',
         'OriginalSrc' => 'Varchar',
         'SortOrder' => 'Int',
-        'Active' => 'Boolean(1)'
+        'Active' => 'Boolean'
     ];
 
     private static $default_sort = 'SortOrder';
