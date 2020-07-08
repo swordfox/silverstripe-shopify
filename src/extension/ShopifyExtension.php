@@ -56,9 +56,6 @@ use Swordfox\Shopify\Model\ProductTag;
 
      public function importProduct($shopifyProduct, $client=null)
      {
-         $delete_on_shopify = Client::config()->get('delete_on_shopify');
-         $delete_on_shopify_after = Client::config()->get('delete_on_shopify_after');
-
          // Create the product
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
              // If called from webhook, initiate $client
