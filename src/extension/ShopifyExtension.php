@@ -56,34 +56,44 @@ use Swordfox\Shopify\Model\ProductTag;
 
      public function importProduct($shopifyProduct, $client=null)
      {
+         $hide_if_no_image = Client::config()->get('hide_if_no_image');
+         $delete_on_shopify = Client::config()->get('delete_on_shopify');
+         $delete_on_shopify_after = Client::config()->get('delete_on_shopify_after');
+
          // Create the product
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
-             // If called from webhook, initiate $client
-             if (!$client) {
-                 try {
-                     $client = new Client();
-                 } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-                     exit($e->getMessage());
-                 } catch (\Exception $e) {
-                     exit($e->getMessage());
+             // If $hide_if_no_image and no images then don't update connections
+             if($hide_if_no_image and !$product->OriginalSrc){
+                 self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
+             }else{
+                 // If called from webhook, initiate $client
+                 if (!$client) {
+                     try {
+                         $client = new Client();
+                     } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+                         exit($e->getMessage());
+                     } catch (\Exception $e) {
+                         exit($e->getMessage());
+                     }
                  }
+
+                 $currentcollections = $product->Collections();
+                 $allcollections = $this->importCollects($client, $shopifyProduct->id);
+
+                 // Remove any collections that have been deleted.
+                 foreach ($currentcollections as $currentcollection) {
+                     if (!in_array($currentcollection->ID, $allcollections)) {
+                         $product->Collections()->remove($currentcollection);
+                     }
+                 }
+
+                 $product->write();
+
+                 // Publish the product and it's connections
+                 $product->publishRecursive();
+                 self::log("[{$product->ID}] Updated product {$product->Title} and it's connections", self::SUCCESS);
              }
 
-             $currentcollections = $product->Collections();
-             $allcollections = $this->importCollects($client, $shopifyProduct->id);
-
-             // Remove any collections that have been deleted.
-             foreach ($currentcollections as $currentcollection) {
-                 if (!in_array($currentcollection->ID, $allcollections)) {
-                     $product->Collections()->remove($currentcollection);
-                 }
-             }
-
-             $product->write();
-
-             // Publish the product and it's connections
-             $product->publishRecursive();
-             self::log("[{$product->ID}] Updated product {$product->Title} and it's connections", self::SUCCESS);
          } else {
              self::log("[{$shopifyProduct->id}] Could not create product", self::ERROR);
          }
