@@ -189,6 +189,15 @@ class Product extends DataObject
         return ($Variant->CompareAt > $Variant->Price ? true : false);
     }
 
+    public function New()
+    {
+        if(strtotime($this->Created.' +7 days') > time()){
+            return true;
+        }
+
+        return false;
+    }
+
     public function Link($action = null)
     {
         $shopifyPage = ShopifyPage::inst();
