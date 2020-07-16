@@ -161,6 +161,10 @@ class Client
             throw new Exception('No shopify domain is set.', self::EXCEPTION_NO_DOMAIN);
         }
 
+        if (!$this->api_limit = self::config()->get('api_limit')) {
+            $this->api_limit = 50; // Default to 50 if not set
+        }
+
         $this->client = new \GuzzleHttp\Client([
             'base_uri' => "https://$domain",
             'headers' => [

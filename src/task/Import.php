@@ -35,10 +35,6 @@ class Import extends BuildTask
             exit($e->getMessage());
         }
 
-        if (!$client->api_limit = $client::config()->get('api_limit')) {
-            $client->api_limit = 50;
-        }
-
         $productsonly = false;
         $productsall = false;
 
