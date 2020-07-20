@@ -134,12 +134,6 @@ class Product extends DataObject
         'ShopifyID'
     ];
 
-    /*public function __construct()
-    {
-        //parent::__construct();
-
-    }*/
-
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -205,7 +199,7 @@ class Product extends DataObject
         $new_based_on = ($new_based_on ? $new_based_on : 'Created');
         $new_timeframe = ($new_timeframe ? $new_timeframe : '+7 days');
 
-        if(strtotime($this->$new_based_on.' '.$new_timeframe) > time()){
+        if($this->$new_based_on and strtotime($this->$new_based_on.' '.$new_timeframe) > time()){
             return true;
         }
 
