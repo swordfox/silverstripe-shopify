@@ -48,6 +48,13 @@ Swordfox\Shopify\Client:
   delete_on_shopify: false
   delete_on_shopify_after: '+3 days' # strtotime('+3 days')
   hide_out_of_stock: false
+  hide_if_no_image: false
+  new_based_on: 'Created' # LastEdited or ImageAdded (use with hide_if_no_image)
+  new_timeframe: '+7 days' # strtotime('+7 days')
+
+# Override $default_sort
+Swordfox\Shopify\Model\Product:
+  default_sort: 'Created DESC' # LastEdited DESC or ImageAdded DESC
 ```
 
 ### Set up import script

@@ -1,26 +1,6 @@
 ---
 Name: shopify
 ---
-#Swordfox\Shopify\Client:
-#  api_key: ''
-#  api_password: ''
-#  api_limit: 50
-#  storefront_access_token: ''
-#  shopify_domain: ''
-#  shared_secret: ''
-#  webhooks_shared_secret: '' # Use same as above for webhooks added via API e.g. dev/tasks/Swordfox-Shopify-Task-Webhooks/create
-#  webhooks_create:
-#    'products/update': 'shop/webhook/update/product'
-#    'products/create': 'shop/webhook/update/product'
-#    'products/delete': 'shop/webhook/delete/product'
-#    'collections/create': 'shop/webhook/update/collection'
-#    'collections/update': 'shop/webhook/update/collection'
-#    'collections/delete': 'shop/webhook/delete/collection'
-#    'inventory_levels/connect': 'shop/webhook/update/inventory'
-#    'inventory_levels/update': 'shop/webhook/update/inventory'
-#  delete_on_shopify: false
-#  delete_on_shopify_after: '+3 days' # strtotime('+3 days')
-#  hide_out_of_stock: false
 
 Swordfox\Shopify\Model\ShopifyPageController:
   extensions:

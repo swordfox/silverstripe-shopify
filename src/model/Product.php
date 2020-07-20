@@ -12,6 +12,7 @@ use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBInt;
+use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\TagField\TagField;
 use SilverStripe\ORM\FieldType\DBIndexable;
@@ -78,7 +79,8 @@ class Product extends DataObject
         'ProductType' => 'Varchar',
         'Tags' => 'Varchar',
         'OriginalSrc' => 'Varchar',
-        'DeleteOnShopify' => 'Date'
+        'DeleteOnShopify' => 'Date',
+        'ImageAdded' => 'DBDatetime'
     ];
 
     private static $data_map = [
@@ -131,6 +133,12 @@ class Product extends DataObject
         'ProductType',
         'ShopifyID'
     ];
+
+    /*public function __construct()
+    {
+        //parent::__construct();
+
+    }*/
 
     public function getCMSFields()
     {
@@ -191,7 +199,13 @@ class Product extends DataObject
 
     public function New()
     {
-        if(strtotime($this->Created.' +7 days') > time()){
+        $new_based_on = Client::config()->get('new_based_on');
+        $new_timeframe = Client::config()->get('new_timeframe');
+
+        $new_based_on = ($new_based_on ? $new_based_on : 'Created');
+        $new_timeframe = ($new_timeframe ? $new_timeframe : '+7 days');
+
+        if(strtotime($this->$new_based_on.' '.$new_timeframe) > time()){
             return true;
         }
 
@@ -228,6 +242,12 @@ class Product extends DataObject
 
         // Create the images
         if (!empty($shopifyProduct->images)) {
+            // Set the ImageAdded date/time if not set
+            if(!$product->ImageAdded){
+                $now = DBDatetime::now()->Rfc2822();
+                $product->ImageAdded = $now;
+            }
+
             $product->OriginalSrc = $shopifyProduct->images[0]->src;
         } else {
             $product->OriginalSrc = '';
