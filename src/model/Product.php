@@ -169,7 +169,7 @@ class Product extends DataObject
         $Variant = $this->Variants()->first();
 
         if ($Variant->Inventory > 0) {
-            return ($Variant->CompareAt ? ('<del>$'.$Variant->CompareAt.'</del> $'.$Variant->Price) : ('$'.$Variant->Price));
+            return ($Variant->CompareAt ? ('$'.$Variant->Price.' <del>$'.$Variant->CompareAt.'</del>') : ('$'.$Variant->Price));
         } elseif ($this->ProductType == 'Gift Card') {
             return '';
         } else {

@@ -12,9 +12,11 @@ use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBInt;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\TagField\TagField;
+use SilverStripe\Security\Permission;
 //use SilverStripe\Versioned\Versioned;
 use SilverStripe\View\Requirements;
 use SilverStripe\ORM\FieldType\DBCurrency;
@@ -83,10 +85,20 @@ class Collection extends DataObject
         'URLSegment' => true
     ];
 
+    private static $searchable_fields = [
+        'Title' => ['title' => 'Title'],
+	    'ShopifyID' => ['title' => 'ShopifyID']
+    ];
+
     private static $summary_fields = [
         'Title',
-        'ShopifyID'
+        'ShopifyID',
+        'IsActive' => 'Active'
     ];
+
+    public function IsActive(){
+        return DBField::create_field('Varchar', ($this->Active ? 'Yes' : 'No'));
+    }
 
     public function getCMSFields()
     {
@@ -185,6 +197,6 @@ class Collection extends DataObject
 
     public function canView($member = null)
     {
-        return ($this->Active ? true : false);
+        return ((Permission::check('CMS_ACCESS_CMSMain', 'any', $member) or $this->Active) ? true : false);
     }
 }
