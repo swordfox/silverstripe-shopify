@@ -88,6 +88,7 @@ class ShopifyPageController extends \PageController
     public function collection(HTTPRequest $request)
     {
         $start = ($request->getVar('start') ? $request->getVar('start') : 0);
+        $sort = ($request->getVar('sort') ? $request->getVar('sort') : null);
 
         if (!$urlSegment = $request->param('ID')) {
             $this->httpError(404);
@@ -103,14 +104,36 @@ class ShopifyPageController extends \PageController
         if ($tagSegment = $request->param('OtherID') and $tag = DataObject::get_one(ProductTag::class, ['URLSegment' => $tagSegment])) {
             $this->SelectedTag = $tag;
 
-            $this->MetaTitle = $tag->Title.' - '.$Collection->Title.' - Online Shop';
+            $this->MetaTitle = $tag->Title.' - '.$Collection->Title.' - '.$this->Title;
 
             $Products = $Collection->Products()
                 ->innerJoin('ShopifyProduct_Tags', 'ShopifyProduct.ID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyProduct_Tags.ShopifyProductTagID = '.$tag->ID);
         } else {
-            $this->MetaTitle = $Collection->Title.' - Online Shop';
+            $this->MetaTitle = $Collection->Title.' - '.$this->Title;
 
             $Products = $Collection->Products();
+        }
+
+        if($sort){
+            switch ($sort) {
+                case 'title':
+                    $sortvar = 'Title';
+                    break;
+
+                case 'titledesc':
+                    $sortvar = 'Title DESC';
+                    break;
+
+                case 'created':
+                    $sortvar = 'Created';
+                    break;
+
+                default:
+                    $sortvar = 'Created DESC';
+                    break;
+            }
+
+            $Products = $Products->sort($sortvar);
         }
 
         if ($this->hide_if_no_image) {
