@@ -59,6 +59,8 @@ class ProductVariant extends DataObject
         'RequiresShipping' => 'Boolean'
     ];
 
+    private static $default_sort = 'Sort';
+
     private static $data_map = [
         'id'=> 'ShopifyID',
         'title'=> 'Title',

@@ -164,12 +164,12 @@ class Product extends DataObject
         return $fields;
     }
 
-    public function Price()
+    public function Price($decimals=0)
     {
         $Variant = $this->Variants()->first();
 
         if ($Variant->Inventory > 0) {
-            return ($Variant->CompareAt ? ('$'.$Variant->Price.' <del>$'.$Variant->CompareAt.'</del>') : ('$'.$Variant->Price));
+            return '$'.number_format($Variant->Price, $decimals).($Variant->CompareAt ? (' <del>$'.number_format($Variant->CompareAt, $decimals).'</del>') : '');
         } elseif ($this->ProductType == 'Gift Card') {
             return '';
         } else {
