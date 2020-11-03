@@ -100,11 +100,11 @@ class ProductVariant extends DataObject
         'ShopifyID'
     ];
 
-    public function getCMSFields()
+    public function onBeforeWrite()
     {
-        $fields = parent::getCMSFields();
+        parent::onBeforeWrite();
 
-        return $fields;
+        $this->extend('updateProductVariant', $this);
     }
 
     /**

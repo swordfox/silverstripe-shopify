@@ -134,6 +134,13 @@ class Product extends DataObject
         'ShopifyID'
     ];
 
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        $this->extend('updateProduct', $this);
+    }
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();

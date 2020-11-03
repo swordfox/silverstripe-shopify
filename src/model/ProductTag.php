@@ -34,11 +34,11 @@ class ProductTag extends DataObject
         'Title'
     ];
 
-    public function getCMSFields()
+    public function onBeforeWrite()
     {
-        $fields = parent::getCMSFields();
+        parent::onBeforeWrite();
 
-        return $fields;
+        $this->extend('updateProductTag', $this);
     }
 
     /**
