@@ -150,6 +150,8 @@ class ShopifyPageController extends \PageController
             $Products,
             $this->getRequest()
         )->setPageLength($this->owner->PageLimit);
+        
+        $this->extend('updateCollectionView', $Collection);
 
         if (Director::is_ajax() or $this->request->getVar('Ajax')=='1') {
             return $Collection->customise(array('Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet, 'start'=>$start, 'SelectedTag'=>$this->SelectedTag))->renderwith('Swordfox/Shopify/Includes/CollectionInner');
@@ -164,24 +166,26 @@ class ShopifyPageController extends \PageController
             $this->httpError(404);
         }
 
-        /** @var Product $product */
-        if (!$product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment])) {
+        /** @var Product $Product */
+        if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment])) {
             $this->httpError(404);
         }
 
-        if($this->hide_if_no_image and !$product->OriginalSrc){
+        if($this->hide_if_no_image and !$Product->OriginalSrc){
             $this->httpError(404);
         }
 
         $this->productactive = true;
-        $this->productselectedurl = $product->Link();
+        $this->productselectedurl = $Product->Link();
 
-        $this->MetaTitle = $product->Title;
+        $this->MetaTitle = $Product->Title;
+
+        $this->extend('updateProductView', $Product);
 
         if (Director::is_ajax() or $request->getVar('Ajax')=='1') {
-            return $product->customise(array('Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet))->renderwith('Swordfox/Shopify/Includes/ProductInner');
+            return $Product->customise(array('Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet))->renderwith('Swordfox/Shopify/Includes/ProductInner');
         } else {
-            return $this->render($product);
+            return $this->render($Product);
         }
     }
 
