@@ -37,6 +37,7 @@ class Import extends BuildTask
 
         $productsonly = false;
         $productsall = false;
+        $collectionsonly = false;
 
         $urlParts = explode('/', $_SERVER['REQUEST_URI']);
         $urlPartsCheckIndex = (Director::is_cli() ? 3 : 4); // Cron or Browser
