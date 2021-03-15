@@ -150,7 +150,7 @@ class ShopifyPageController extends \PageController
             $Products,
             $this->getRequest()
         )->setPageLength($this->owner->PageLimit);
-        
+
         $this->extend('updateCollectionView', $Collection);
 
         if (Director::is_ajax() or $this->request->getVar('Ajax')=='1') {

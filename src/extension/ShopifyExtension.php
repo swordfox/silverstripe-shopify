@@ -63,31 +63,20 @@ use Swordfox\Shopify\Model\ProductTag;
          // Create the product
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
              // If $hide_if_no_image and no images then don't update connections
-             if($hide_if_no_image and !$product->OriginalSrc){
+             if($client or ($hide_if_no_image and !$product->OriginalSrc)){
                  self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
-             }else{
-                 // If called from webhook, initiate $client
-                 if (!$client) {
-                     try {
-                         $client = new Client();
-                     } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-                         exit($e->getMessage());
-                     } catch (\Exception $e) {
-                         exit($e->getMessage());
-                     }
+             }elseif($product->New){
+                 // If called from webhook, initiate $client & update connections
+                 try {
+                     $client = new Client();
+                 } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+                     exit($e->getMessage());
+                 } catch (\Exception $e) {
+                     exit($e->getMessage());
                  }
 
-                 $currentcollections = $product->Collections();
-                 $allcollections = $this->importCollects($client, $shopifyProduct->id);
-
-                 // Remove any collections that have been deleted.
-                 foreach ($currentcollections as $currentcollection) {
-                     if (!in_array($currentcollection->ID, $allcollections)) {
-                         $product->Collections()->remove($currentcollection);
-                     }
-                 }
-
-                 $product->write();
+                 $this->importCollections($client, 'custom_collections');
+                 $this->importCollections($client, 'smart_collections');
 
                  // Publish the product and it's connections
                  $product->publishRecursive();
@@ -115,12 +104,12 @@ use Swordfox\Shopify\Model\ProductTag;
 
          if (($collections = $collections->getBody()->getContents()) && $collections = Convert::json2obj($collections)) {
              foreach ($collections->{$type} as $shopifyCollection) {
-                 $this->importCollection($shopifyCollection);
+                 $this->importCollection($client, $shopifyCollection);
              }
          }
      }
 
-     public function importCollection($shopifyCollection)
+     public function importCollection(Client $client, $shopifyCollection)
      {
          if ($shopifyCollection->published_scope == 'global' or $shopifyCollection->published_scope == 'web') {
              // Create the collection
@@ -128,48 +117,59 @@ use Swordfox\Shopify\Model\ProductTag;
                  // Publish the product and it's connections
                  $collection->publishRecursive();
                  self::log("[{$collection->ID}] Published collection {$collection->Title} and it's connections", self::SUCCESS);
+
+                 $currentproducts = $collection->Products();
+                 $allproducts = [];
+
+                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&fields=id,title&limit=50';
+
+                 do {
+                    $products = $client->collectionProducts($methodUri);
+                    $productsHeaderLink = $products->getHeader('Link');
+
+                    if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+                        echo count($products->products);
+                        foreach ($products->products as $shopifyProduct) {
+                            print_r($shopifyProduct);
+                            if ($product = Product::getByShopifyID($shopifyProduct->id)) {
+                                $collection->Products()->add($product);
+
+                                array_push($allproducts, $product->ID);
+                            }
+                         }
+                     }
+
+                     $methodUri = null;
+                     if (!is_null($productsHeaderLink) && count($productsHeaderLink) == 1) {
+                         $link = $productsHeaderLink[0];
+
+                         if(strlen($link) > 0 && strpos($productsHeaderLink[0], '>; rel="next"') > 0){
+                             $strposrelnext = strpos($productsHeaderLink[0], '>; rel="next"');
+                             if(strlen($link) > 0 && strpos($productsHeaderLink[0], '>; rel="previous"') > 0){
+                                 $strposrelprev = strpos($productsHeaderLink[0], '>; rel="previous"');
+
+                                 $methodUri = trim(substr($productsHeaderLink[0], $strposrelprev+20, -13));
+                             }else{
+                                 $methodUri = trim(substr($productsHeaderLink[0], 1, -13));
+                             }
+                         }
+                     }
+
+                 } while (!is_null($methodUri) && strlen($methodUri) > 0);
+
+                 // Remove any collections that have been deleted.
+                 foreach ($currentproducts as $currentproduct) {
+                     if (!in_array($currentproduct->ID, $allproducts)) {
+                         $collection->Products()->remove($currentproduct);
+                     }
+                 }
+
+                 $collection->write();
+
              } else {
                  self::log("[{$shopifyCollection->id}] Could not create collection", self::ERROR);
              }
          }
-     }
-
-     /**
-      * Import the Shopify Collects
-      * @param Client $client
-      *
-      * @throws \SilverStripe\ORM\ValidationException
-      */
-     public function importCollects(Client $client, $product_id)
-     {
-         try {
-             $collects = $client->collects($product_id);
-         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-             exit($e->getMessage());
-         }
-
-         $allcollections = [];
-
-         if (($collects = $collects->getBody()->getContents()) && $collects = Convert::json2obj($collects)) {
-             foreach ($collects->collects as $shopifyCollect) {
-                 if (
-                     ($collection = Collection::getByShopifyID($shopifyCollect->collection_id))
-                     && ($product = Product::getByShopifyID($shopifyCollect->product_id))
-                 ) {
-                     $collection->Products()->add($product, [
-                         'ShopifyID' => $shopifyCollect->id,
-                         'SortValue' => $shopifyCollect->sort_value,
-                         'Position' => $shopifyCollect->position,
-                         'Featured' => $shopifyCollect->featured
-                     ]);
-                     self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
-
-                     array_push($allcollections, $collection->ID);
-                 }
-             }
-         }
-
-         return $allcollections;
      }
 
      /**

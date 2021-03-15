@@ -32,6 +32,7 @@ Swordfox\Shopify\Client:
   api_key: 'YOUR_API_KEY'
   api_password: 'YOUR_API_PASSWORD'
   api_limit: 50 # Default limit, 250 max
+  api_version: '2021-01' # Default 2021-01
   storefront_access_token: 'YOUR_ACCESS_TOKEN' # for buybutton code
   shopify_domain: 'YOUR_SHOPIFY_DOMAIN' # mydomain.myshopify.com
   shared_secret: 'YOUR_API_SHARED_SECRET'

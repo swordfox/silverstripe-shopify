@@ -47,6 +47,8 @@ class Import extends BuildTask
             } elseif ($urlParts[$urlPartsCheckIndex]=='productsall') {
                 $productsall = true;
                 $client->api_limit = 250; // Set to maximum API limit
+            } elseif ($urlParts[$urlPartsCheckIndex]=='collectionsonly') {
+                $collectionsonly = true;
             }
         }
 
@@ -56,6 +58,9 @@ class Import extends BuildTask
 
         if ($productsonly) {
             $this->importProducts($client);
+        } else if ($collectionsonly) {
+            $this->importCollections($client, 'custom_collections');
+            $this->importCollections($client, 'smart_collections');
         } else {
             $this->importCollections($client, 'custom_collections');
             $this->importCollections($client, 'smart_collections');

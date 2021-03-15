@@ -64,7 +64,7 @@ class Client
      */
     public function products($since_id, $all)
     {
-        return $this->client->request('GET', 'admin/products.json?limit='.$this->api_limit.($all ? '' : '&order=updated_at+desc').(($since_id or $all) ? ('&since_id='.$since_id) : ''));
+        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products.json?limit='.$this->api_limit.($all ? '' : '&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&order=updated_at+desc').(($since_id or $all) ? ('&since_id='.$since_id) : ''));
     }
 
     /**
@@ -79,12 +79,12 @@ class Client
      */
     public function product($product_id)
     {
-        return $this->client->request('GET', "admin/products/$product_id.json");
+        return $this->client->request('GET', "admin/api/'.$this->api_version.'/products/$product_id.json");
     }
 
     public function deleteProduct($product_id)
     {
-        return $this->client->request('DELETE', "admin/products/$product_id.json");
+        return $this->client->request('DELETE', "admin/api/'.$this->api_version.'/products/$product_id.json");
     }
 
     /**
@@ -95,18 +95,18 @@ class Client
      */
     public function collections($type)
     {
-        return $this->client->request('GET', 'admin/'.$type.'.json?limit='.$this->api_limit);
+        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/'.$type.'.json?limit='.$this->api_limit);
     }
 
     /**
-     * Get the connections between Products and Collections
+     * Get the available Collection Products
      *
      * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function collects($product_id)
+    public function collectionProducts($url)
     {
-        return $this->client->request('GET', 'admin/collects.json?order=updated_at+desc&limit='.$this->api_limit.'&product_id='.$product_id);
+        return $this->client->request('GET', $url);
     }
 
     /**
@@ -117,7 +117,7 @@ class Client
      */
     public function createWebhook($data)
     {
-        return $this->client->request('POST', 'admin/webhooks.json', $data);
+        return $this->client->request('POST', 'admin/api/'.$this->api_version.'/webhooks.json', $data);
     }
 
     /**
@@ -128,7 +128,7 @@ class Client
      */
     public function deleteWebhook($deleteid)
     {
-        return $this->client->request('DELETE', 'admin/webhooks/'.$deleteid.'.json');
+        return $this->client->request('DELETE', 'admin/api/'.$this->api_version.'/webhooks/'.$deleteid.'.json');
     }
 
     /**
@@ -139,7 +139,7 @@ class Client
      */
     public function getWebhooks()
     {
-        return $this->client->request('GET', 'admin/webhooks.json');
+        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/webhooks.json');
     }
 
     /**
@@ -163,6 +163,10 @@ class Client
 
         if (!$this->api_limit = self::config()->get('api_limit')) {
             $this->api_limit = 50; // Default to 50 if not set
+        }
+
+        if (!$this->api_version = self::config()->get('api_version')) {
+            $this->api_version = '2021-01';
         }
 
         $this->client = new \GuzzleHttp\Client([

@@ -239,6 +239,9 @@ class Product extends DataObject
 
         if (!$product = self::getByShopifyID($shopifyProduct->id)) {
             $product = self::create();
+            $product->New = 1;
+        }else{
+            $product->New = 0;
         }
 
         // Create the images
