@@ -47,7 +47,6 @@ class Import extends BuildTask
                 $productsonly = true;
             } elseif ($urlParts[$urlPartsCheckIndex]=='productsall') {
                 $productsall = true;
-                $client->api_limit = 250; // Set to maximum API limit
             } elseif ($urlParts[$urlPartsCheckIndex]=='collectionsonly') {
                 $collectionsonly = true;
             }
@@ -62,8 +61,12 @@ class Import extends BuildTask
         } else if ($collectionsonly) {
             $this->importCollections($client, 'custom_collections');
             $this->importCollections($client, 'smart_collections');
-        } else {
+        } else if ($productsall) {
             $this->importProductsAll($client);
+        } else {
+            $this->importCollections($client, 'custom_collections');
+            $this->importCollections($client, 'smart_collections');
+            $this->importProducts($client);
         }
 
         if (!Director::is_cli()) {
