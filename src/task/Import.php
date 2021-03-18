@@ -63,9 +63,7 @@ class Import extends BuildTask
             $this->importCollections($client, 'custom_collections');
             $this->importCollections($client, 'smart_collections');
         } else {
-            $this->importCollections($client, 'custom_collections');
-            $this->importCollections($client, 'smart_collections');
-            $this->importProducts($client, $productsall);
+            $this->importProductsAll($client);
         }
 
         if (!Director::is_cli()) {

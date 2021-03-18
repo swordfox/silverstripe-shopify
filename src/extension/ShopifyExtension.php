@@ -54,6 +54,31 @@ use Swordfox\Shopify\Model\ProductTag;
          }
      }
 
+     /**
+      * Import the shopify products
+      * @param Client $client
+      *
+      * @throws \Exception
+      */
+     public function importProductsAll(Client $client)
+     {
+         $methodUri = 'admin/api/'.$client->api_version.'/products.json?fields=id,title&limit=250';
+
+         do {
+            $products = $client->paginationCall($methodUri);
+            $headerLink = $products->getHeader('Link');
+
+            if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+                foreach ($products->products as $shopifyProduct) {
+                    $this->importProduct($shopifyProduct, $client);
+                }
+             }
+
+             $methodUri = $this->methodUri($headerLink);
+
+         } while (!is_null($methodUri) && strlen($methodUri) > 0);
+     }
+
      public function importProduct($shopifyProduct, $client=null)
      {
          $hide_if_no_image = Client::config()->get('hide_if_no_image');
@@ -121,16 +146,14 @@ use Swordfox\Shopify\Model\ProductTag;
                  $currentproducts = $collection->Products();
                  $allproducts = [];
 
-                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&fields=id,title&limit=50';
+                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&fields=id,title&limit=250';
 
                  do {
-                    $products = $client->collectionProducts($methodUri);
-                    $productsHeaderLink = $products->getHeader('Link');
+                    $products = $client->paginationCall($methodUri);
+                    $headerLink = $products->getHeader('Link');
 
                     if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
-                        echo count($products->products);
                         foreach ($products->products as $shopifyProduct) {
-                            print_r($shopifyProduct);
                             if ($product = Product::getByShopifyID($shopifyProduct->id)) {
                                 $collection->Products()->add($product);
 
@@ -139,21 +162,7 @@ use Swordfox\Shopify\Model\ProductTag;
                          }
                      }
 
-                     $methodUri = null;
-                     if (!is_null($productsHeaderLink) && count($productsHeaderLink) == 1) {
-                         $link = $productsHeaderLink[0];
-
-                         if(strlen($link) > 0 && strpos($productsHeaderLink[0], '>; rel="next"') > 0){
-                             $strposrelnext = strpos($productsHeaderLink[0], '>; rel="next"');
-                             if(strlen($link) > 0 && strpos($productsHeaderLink[0], '>; rel="previous"') > 0){
-                                 $strposrelprev = strpos($productsHeaderLink[0], '>; rel="previous"');
-
-                                 $methodUri = trim(substr($productsHeaderLink[0], $strposrelprev+20, -13));
-                             }else{
-                                 $methodUri = trim(substr($productsHeaderLink[0], 1, -13));
-                             }
-                         }
-                     }
+                     $methodUri = $this->methodUri($headerLink);
 
                  } while (!is_null($methodUri) && strlen($methodUri) > 0);
 
@@ -170,6 +179,26 @@ use Swordfox\Shopify\Model\ProductTag;
                  self::log("[{$shopifyCollection->id}] Could not create collection", self::ERROR);
              }
          }
+     }
+
+     public function methodUri($headerLink){
+         $methodUri = null;
+         if (!is_null($headerLink) && count($headerLink) == 1) {
+             $link = $headerLink[0];
+
+             if(strlen($link) > 0 && strpos($headerLink[0], '>; rel="next"') > 0){
+                 $strposrelnext = strpos($headerLink[0], '>; rel="next"');
+                 if(strlen($link) > 0 && strpos($headerLink[0], '>; rel="previous"') > 0){
+                     $strposrelprev = strpos($headerLink[0], '>; rel="previous"');
+
+                     $methodUri = trim(substr($headerLink[0], $strposrelprev+20, -13));
+                 }else{
+                     $methodUri = trim(substr($headerLink[0], 1, -13));
+                 }
+             }
+         }
+
+         return $methodUri;
      }
 
      /**

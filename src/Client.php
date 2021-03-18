@@ -104,7 +104,7 @@ class Client
      * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function collectionProducts($url)
+    public function paginationCall($url)
     {
         return $this->client->request('GET', $url);
     }
