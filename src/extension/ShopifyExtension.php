@@ -98,8 +98,8 @@ use Swordfox\Shopify\Model\ProductTag;
                      exit($e->getMessage());
                  }
 
-                 $this->importCollections($client, 'custom_collections', '-1 day');
-                 $this->importCollections($client, 'smart_collections', '-1 day');
+                 $this->importCollections($client, 'custom_collections', '-1 hour');
+                 $this->importCollections($client, 'smart_collections', '-1 hour');
 
                  // Publish the product and it's connections
                  $product->publishRecursive();
