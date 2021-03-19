@@ -62,9 +62,9 @@ class Client
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function products($since_id, $all)
+    public function products()
     {
-        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products.json?limit='.$this->api_limit.($all ? '' : '&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&order=updated_at+desc').(($since_id or $all) ? ('&since_id='.$since_id) : ''));
+        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products.json?limit='.$this->api_limit.'&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&order=updated_at+desc');
     }
 
     /**

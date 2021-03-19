@@ -38,7 +38,7 @@ use Swordfox\Shopify\Model\ProductTag;
      public function importProducts(Client $client, $all=false, $since_id=0)
      {
          try {
-             $products = $client->products($since_id, $all);
+             $products = $client->products();
          } catch (\GuzzleHttp\Exception\GuzzleException $e) {
              exit($e->getMessage());
          }
@@ -46,10 +46,6 @@ use Swordfox\Shopify\Model\ProductTag;
          if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
              foreach ($products->products as $shopifyProduct) {
                  $this->importProduct($shopifyProduct, $client);
-             }
-
-             if (count($products->products) and $all) {
-                 $this->importProducts($client, $all, $shopifyProduct->id);
              }
          }
      }
@@ -89,6 +85,8 @@ use Swordfox\Shopify\Model\ProductTag;
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
              // If $hide_if_no_image and no images then don't update connections
              if($client or ($hide_if_no_image and !$product->OriginalSrc)){
+                 // Publish the product and it's connections
+                 $product->publishRecursive();
                  self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
              }elseif($product->New){
                  // If called from webhook, initiate $client & update connections
@@ -146,7 +144,7 @@ use Swordfox\Shopify\Model\ProductTag;
                  $currentproducts = $collection->Products();
                  $allproducts = [];
 
-                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&fields=id,title&limit=250';
+                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&limit=250';
 
                  do {
                     $products = $client->paginationCall($methodUri);
