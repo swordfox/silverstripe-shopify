@@ -58,7 +58,7 @@ use Swordfox\Shopify\Model\ProductTag;
       */
      public function importProductsAll(Client $client)
      {
-         $methodUri = 'admin/api/'.$client->api_version.'/products.json?fields=id,title&limit=250';
+         $methodUri = 'admin/api/'.$client->api_version.'/products.json?limit=250';
 
          do {
             $products = $client->paginationCall($methodUri);
@@ -98,8 +98,8 @@ use Swordfox\Shopify\Model\ProductTag;
                      exit($e->getMessage());
                  }
 
-                 $this->importCollections($client, 'custom_collections');
-                 $this->importCollections($client, 'smart_collections');
+                 $this->importCollections($client, 'custom_collections', '-1 day');
+                 $this->importCollections($client, 'smart_collections', '-1 day');
 
                  // Publish the product and it's connections
                  $product->publishRecursive();
@@ -117,7 +117,7 @@ use Swordfox\Shopify\Model\ProductTag;
       *
       * @throws \SilverStripe\ORM\ValidationException
       */
-     public function importCollections(Client $client, $type)
+     public function importCollections(Client $client, $type, $updatedatmin=false)
      {
          try {
              $collections = $client->collections($type);
@@ -127,12 +127,12 @@ use Swordfox\Shopify\Model\ProductTag;
 
          if (($collections = $collections->getBody()->getContents()) && $collections = Convert::json2obj($collections)) {
              foreach ($collections->{$type} as $shopifyCollection) {
-                 $this->importCollection($client, $shopifyCollection);
+                 $this->importCollection($client, $shopifyCollection, $updatedatmin);
              }
          }
      }
 
-     public function importCollection(Client $client, $shopifyCollection)
+     public function importCollection(Client $client, $shopifyCollection, $updatedatmin)
      {
          if ($shopifyCollection->published_scope == 'global' or $shopifyCollection->published_scope == 'web') {
              // Create the collection
@@ -144,7 +144,7 @@ use Swordfox\Shopify\Model\ProductTag;
                  $currentproducts = $collection->Products();
                  $allproducts = [];
 
-                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&limit=250';
+                 $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&limit=250'.($updatedatmin ? ('&updated_at_min='.date(DATE_ATOM, strtotime($updatedatmin))) : '');
 
                  do {
                     $products = $client->paginationCall($methodUri);
@@ -164,12 +164,15 @@ use Swordfox\Shopify\Model\ProductTag;
 
                  } while (!is_null($methodUri) && strlen($methodUri) > 0);
 
-                 // Remove any collections that have been deleted.
-                 foreach ($currentproducts as $currentproduct) {
-                     if (!in_array($currentproduct->ID, $allproducts)) {
-                         $collection->Products()->remove($currentproduct);
+                 if(!$updatedatmin)
+                 {
+                     // Remove any collections that have been deleted.
+                     foreach ($currentproducts as $currentproduct) {
+                         if (!in_array($currentproduct->ID, $allproducts)) {
+                             $collection->Products()->remove($currentproduct);
+                         }
                      }
-                 }
+                }
 
                  $collection->write();
 
