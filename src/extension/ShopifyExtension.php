@@ -83,7 +83,7 @@ use Swordfox\Shopify\Model\ProductTag;
          // Create the product
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
              // If $hide_if_no_image and no images then don't update connections
-             if ($client or ($hide_if_no_image and !$product->OriginalSrc)) {
+             if($hide_if_no_image and !$product->OriginalSrc){
                  // Publish the product and it's connections
                  $product->publishRecursive();
                  self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
