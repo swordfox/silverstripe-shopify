@@ -61,17 +61,16 @@ use Swordfox\Shopify\Model\ProductTag;
          $methodUri = 'admin/api/'.$client->api_version.'/products.json?limit=250';
 
          do {
-            $products = $client->paginationCall($methodUri);
-            $headerLink = $products->getHeader('Link');
+             $products = $client->paginationCall($methodUri);
+             $headerLink = $products->getHeader('Link');
 
-            if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
-                foreach ($products->products as $shopifyProduct) {
-                    $this->importProduct($shopifyProduct, $client);
-                }
+             if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+                 foreach ($products->products as $shopifyProduct) {
+                     $this->importProduct($shopifyProduct, $client);
+                 }
              }
 
              $methodUri = $this->methodUri($headerLink);
-
          } while (!is_null($methodUri) && strlen($methodUri) > 0);
      }
 
@@ -84,11 +83,11 @@ use Swordfox\Shopify\Model\ProductTag;
          // Create the product
          if ($product = $this->importObject(Product::class, $shopifyProduct)) {
              // If $hide_if_no_image and no images then don't update connections
-             if($client or ($hide_if_no_image and !$product->OriginalSrc)){
+             if ($client or ($hide_if_no_image and !$product->OriginalSrc)) {
                  // Publish the product and it's connections
                  $product->publishRecursive();
                  self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
-             }elseif($product->New){
+             } else {
                  // If called from webhook, initiate $client & update connections
                  try {
                      $client = new Client();
@@ -98,14 +97,28 @@ use Swordfox\Shopify\Model\ProductTag;
                      exit($e->getMessage());
                  }
 
-                 $this->importCollections($client, 'custom_collections', '-1 hour');
-                 $this->importCollections($client, 'smart_collections', '-1 hour');
+                 // Get Collects for custom_collections only
+                 $currentcollections = $product->Collections();
+                 $allcollections = $this->importCollects($client, $shopifyProduct->id);
+
+                 // Remove any collections that have been deleted.
+                 foreach ($currentcollections as $currentcollection) {
+                     if (!in_array($currentcollection->ID, $allcollections)) {
+                         $product->Collections()->remove($currentcollection);
+                     }
+                 }
+
+                 $product->write();
+
+                 if ($product->New) {
+                     // Maybe do this???
+                     $this->importCollections($client, 'smart_collections', '-1 hour');
+                 }
 
                  // Publish the product and it's connections
                  $product->publishRecursive();
                  self::log("[{$product->ID}] Updated product {$product->Title} and it's connections", self::SUCCESS);
              }
-
          } else {
              self::log("[{$shopifyProduct->id}] Could not create product", self::ERROR);
          }
@@ -127,12 +140,12 @@ use Swordfox\Shopify\Model\ProductTag;
 
          if (($collections = $collections->getBody()->getContents()) && $collections = Convert::json2obj($collections)) {
              foreach ($collections->{$type} as $shopifyCollection) {
-                 $this->importCollection($client, $shopifyCollection, $updatedatmin);
+                 $this->importCollection($shopifyCollection, $client, $updatedatmin);
              }
          }
      }
 
-     public function importCollection(Client $client, $shopifyCollection, $updatedatmin)
+     public function importCollection($shopifyCollection, $client=null, $updatedatmin=false)
      {
          if ($shopifyCollection->published_scope == 'global' or $shopifyCollection->published_scope == 'web') {
              // Create the collection
@@ -141,59 +154,106 @@ use Swordfox\Shopify\Model\ProductTag;
                  $collection->publishRecursive();
                  self::log("[{$collection->ID}] Published collection {$collection->Title} and it's connections", self::SUCCESS);
 
+                 if (!$client) {
+                     // If called from webhook, initiate $client & update connections
+                     try {
+                         $client = new Client();
+                     } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+                         exit($e->getMessage());
+                     } catch (\Exception $e) {
+                         exit($e->getMessage());
+                     }
+                 }
+
                  $currentproducts = $collection->Products();
                  $allproducts = [];
 
                  $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&limit=250'.($updatedatmin ? ('&updated_at_min='.date(DATE_ATOM, strtotime($updatedatmin))) : '');
 
                  do {
-                    $products = $client->paginationCall($methodUri);
-                    $headerLink = $products->getHeader('Link');
+                     $products = $client->paginationCall($methodUri);
+                     $headerLink = $products->getHeader('Link');
 
-                    if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
-                        foreach ($products->products as $shopifyProduct) {
-                            if ($product = Product::getByShopifyID($shopifyProduct->id)) {
-                                $collection->Products()->add($product);
+                     if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+                         foreach ($products->products as $shopifyProduct) {
+                             if ($product = Product::getByShopifyID($shopifyProduct->id)) {
+                                 $collection->Products()->add($product);
 
-                                array_push($allproducts, $product->ID);
-                            }
+                                 array_push($allproducts, $product->ID);
+                             }
                          }
                      }
 
                      $methodUri = $this->methodUri($headerLink);
-
                  } while (!is_null($methodUri) && strlen($methodUri) > 0);
 
-                 if(!$updatedatmin)
-                 {
+                 if (!$updatedatmin) {
                      // Remove any collections that have been deleted.
                      foreach ($currentproducts as $currentproduct) {
                          if (!in_array($currentproduct->ID, $allproducts)) {
                              $collection->Products()->remove($currentproduct);
                          }
                      }
-                }
+                 }
 
                  $collection->write();
-
              } else {
                  self::log("[{$shopifyCollection->id}] Could not create collection", self::ERROR);
              }
          }
      }
 
-     public function methodUri($headerLink){
+     /**
+      * Import the Shopify Collects
+      * @param Client $client
+      *
+      * @throws \SilverStripe\ORM\ValidationException
+      */
+     public function importCollects(Client $client, $product_id)
+     {
+         try {
+             $collects = $client->collects($product_id);
+         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+             exit($e->getMessage());
+         }
+
+         $allcollections = [];
+
+         if (($collects = $collects->getBody()->getContents()) && $collects = Convert::json2obj($collects)) {
+             foreach ($collects->collects as $shopifyCollect) {
+                 if (
+                     ($collection = Collection::getByShopifyID($shopifyCollect->collection_id))
+                     && ($product = Product::getByShopifyID($shopifyCollect->product_id))
+                 ) {
+                     $collection->Products()->add($product, [
+                         'ShopifyID' => $shopifyCollect->id,
+                         'SortValue' => $shopifyCollect->sort_value,
+                         'Position' => $shopifyCollect->position,
+                         'Featured' => $shopifyCollect->featured
+                     ]);
+                     self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
+
+                     array_push($allcollections, $collection->ID);
+                 }
+             }
+         }
+
+         return $allcollections;
+     }
+
+     public function methodUri($headerLink)
+     {
          $methodUri = null;
          if (!is_null($headerLink) && count($headerLink) == 1) {
              $link = $headerLink[0];
 
-             if(strlen($link) > 0 && strpos($headerLink[0], '>; rel="next"') > 0){
+             if (strlen($link) > 0 && strpos($headerLink[0], '>; rel="next"') > 0) {
                  $strposrelnext = strpos($headerLink[0], '>; rel="next"');
-                 if(strlen($link) > 0 && strpos($headerLink[0], '>; rel="previous"') > 0){
+                 if (strlen($link) > 0 && strpos($headerLink[0], '>; rel="previous"') > 0) {
                      $strposrelprev = strpos($headerLink[0], '>; rel="previous"');
 
                      $methodUri = trim(substr($headerLink[0], $strposrelprev+20, -13));
-                 }else{
+                 } else {
                      $methodUri = trim(substr($headerLink[0], 1, -13));
                  }
              }

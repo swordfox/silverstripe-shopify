@@ -206,7 +206,7 @@ class Product extends DataObject
         $new_based_on = ($new_based_on ? $new_based_on : 'Created');
         $new_timeframe = ($new_timeframe ? $new_timeframe : '+7 days');
 
-        if($this->$new_based_on and strtotime($this->$new_based_on.' '.$new_timeframe) > time()){
+        if ($this->$new_based_on and strtotime($this->$new_based_on.' '.$new_timeframe) > time()) {
             return true;
         }
 
@@ -240,14 +240,14 @@ class Product extends DataObject
         if (!$product = self::getByShopifyID($shopifyProduct->id)) {
             $product = self::create();
             $product->New = 1;
-        }else{
+        } else {
             $product->New = 0;
         }
 
         // Create the images
         if (!empty($shopifyProduct->images)) {
             // Set the ImageAdded date/time if not set
-            if(!$product->ImageAdded){
+            if (!$product->ImageAdded) {
                 $now = DBDatetime::now()->Rfc2822();
                 $product->ImageAdded = $now;
             }

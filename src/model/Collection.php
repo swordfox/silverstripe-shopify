@@ -87,7 +87,7 @@ class Collection extends DataObject
 
     private static $searchable_fields = [
         'Title' => ['title' => 'Title'],
-	    'ShopifyID' => ['title' => 'ShopifyID']
+        'ShopifyID' => ['title' => 'ShopifyID']
     ];
 
     private static $summary_fields = [
@@ -96,7 +96,8 @@ class Collection extends DataObject
         'IsActive' => 'Active'
     ];
 
-    public function IsActive(){
+    public function IsActive()
+    {
         return DBField::create_field('Varchar', ($this->Active ? 'Yes' : 'No'));
     }
 

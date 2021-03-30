@@ -114,7 +114,7 @@ class ShopifyPageController extends \PageController
             $Products = $Collection->Products();
         }
 
-        if($sort){
+        if ($sort) {
             switch ($sort) {
                 case 'title':
                     $sortvar = 'Title';
@@ -171,7 +171,7 @@ class ShopifyPageController extends \PageController
             $this->httpError(404);
         }
 
-        if($this->hide_if_no_image and !$Product->OriginalSrc){
+        if ($this->hide_if_no_image and !$Product->OriginalSrc) {
             $this->httpError(404);
         }
 
@@ -205,8 +205,17 @@ class ShopifyPageController extends \PageController
 
         /*
         // Example Product Data
-        $data = '{"id":4643710664801,"title":"Test product","body_html":"Test product","vendor":"The Walk in Wardrobe","product_type":"","created_at":"2020-05-26T11:01:00+12:00","handle":"test-product","updated_at":"2020-05-26T11:01:01+12:00","published_at":null,"template_suffix":"","published_scope":"global","tags":"","admin_graphql_api_id":"gid:\/\/shopify\/Product\/4643710664801","variants":[{"id":32338683166817,"product_id":4643710664801,"title":"Default Title","price":"1111.00","sku":"","position":1,"inventory_policy":"deny","compare_at_price":null,"fulfillment_service":"manual","inventory_management":"shopify","option1":"Default Title","option2":null,"option3":null,"created_at":"2020-05-26T11:01:00+12:00","updated_at":"2020-05-26T11:01:00+12:00","taxable":true,"barcode":"","grams":0,"image_id":null,"weight":0.0,"weight_unit":"kg","inventory_item_id":34269676896353,"inventory_quantity":1,"old_inventory_quantity":1,"requires_shipping":true,"admin_graphql_api_id":"gid:\/\/shopify\/ProductVariant\/32338683166817"}],"options":[{"id":6037006811233,"product_id":4643710664801,"name":"Title","position":1,"values":["Default Title"]}],"images":[{"id":15214163165281,"product_id":4643710664801,"position":1,"created_at":"2020-05-26T11:01:01+12:00","updated_at":"2020-05-26T11:01:01+12:00","alt":null,"width":630,"height":630,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/5338644_0.jpg?v=1590447661","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/15214163165281"}],"image":{"id":15214163165281,"product_id":4643710664801,"position":1,"created_at":"2020-05-26T11:01:01+12:00","updated_at":"2020-05-26T11:01:01+12:00","alt":null,"width":630,"height":630,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/5338644_0.jpg?v=1590447661","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/15214163165281"}}';
+        $data = '{"id":6538030776417,"title":"7 For All Mankind Cami Size 10","body_html":"\u003cp\u003eBlack silk cami by 7 For All Mankind, size M on the label, NZ 10.\u003c\/p\u003e\n\u003cp\u003e \u003c\/p\u003e","vendor":"WIW","product_type":"Cami’s and Singlets","created_at":"2021-03-01T07:06:45+13:00","handle":"7-for-all-mankind-cami-size-10","updated_at":"2021-03-30T15:25:14+13:00","published_at":null,"template_suffix":"","status":"active","published_scope":"global","tags":"Cami\'s and Singlets","admin_graphql_api_id":"gid:\/\/shopify\/Product\/6538030776417","variants":[{"id":39252435533921,"product_id":6538030776417,"title":"Default Title","price":"45.00","sku":"WIW0011736","position":1,"inventory_policy":"deny","compare_at_price":null,"fulfillment_service":"manual","inventory_management":"shopify","option1":"Default Title","option2":null,"option3":null,"created_at":"2021-03-01T07:06:45+13:00","updated_at":"2021-03-30T15:25:14+13:00","taxable":true,"barcode":"605604","grams":0,"image_id":null,"weight":0.0,"weight_unit":"kg","inventory_item_id":41346353463393,"inventory_quantity":1,"old_inventory_quantity":1,"requires_shipping":true,"admin_graphql_api_id":"gid:\/\/shopify\/ProductVariant\/39252435533921"}],"options":[{"id":8408611127393,"product_id":6538030776417,"name":"Title","position":1,"values":["Default Title"]}],"images":[{"id":27968027328609,"product_id":6538030776417,"position":1,"created_at":"2021-03-04T10:19:53+13:00","updated_at":"2021-03-04T10:19:53+13:00","alt":null,"width":1080,"height":1439,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/image_05428045-eac0-4ba6-a69d-99ab513cd552.png?v=1614806393","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/27968027328609"},{"id":27968027459681,"product_id":6538030776417,"position":2,"created_at":"2021-03-04T10:19:55+13:00","updated_at":"2021-03-04T10:19:55+13:00","alt":null,"width":1080,"height":1439,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/image_18d142b9-0bb4-42d7-b40b-ade7ac398029.png?v=1614806395","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/27968027459681"}],"image":{"id":27968027328609,"product_id":6538030776417,"position":1,"created_at":"2021-03-04T10:19:53+13:00","updated_at":"2021-03-04T10:19:53+13:00","alt":null,"width":1080,"height":1439,"src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0279\/5156\/2849\/products\/image_05428045-eac0-4ba6-a69d-99ab513cd552.png?v=1614806393","variant_ids":[],"admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/27968027328609"}}';
+        $verified = 1;
+        */
 
+        /*
+        // Example Collection Data
+        $data = '{"id":163499343969,"handle":"womens-medium","updated_at":"2021-03-30T15:59:01+13:00","published_at":null,"sort_order":"best-selling","template_suffix":"","published_scope":"global","title":"Women’s - Medium (Sizes 12-14)","body_html":"\u003cp\u003eAll items are in excelled pre-loved condition. We sell quality brands from all over the world at affordable second hand prices.\u003c\/p\u003e\n\u003cp\u003e \u003c\/p\u003e","admin_graphql_api_id":"gid:\/\/shopify\/Collection\/163499343969"}';
+        $verified = 1;
+        */
+
+        /*
         // Example Inventory Data
         $data = '{"inventory_item_id":34269676896353,"location_id":36167909473,"available":0,"updated_at":"2020-05-26T11:35:10+12:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/70049923169?inventory_item_id=34269676896353"}';
         $verified = 1;

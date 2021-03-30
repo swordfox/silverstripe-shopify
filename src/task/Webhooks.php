@@ -29,7 +29,7 @@ class Webhooks extends BuildTask
     {
         $baseurl = Director::AbsoluteBaseURL();
 
-        if (!$webhooks_create = Client::config()->get('webhooks_create')){
+        if (!$webhooks_create = Client::config()->get('webhooks_create')) {
             throw new Exception('No webhooks found.');
         }
 
@@ -50,10 +50,10 @@ class Webhooks extends BuildTask
         if (isset($urlParts[$urlPartsCheckIndex])) {
             if ($urlParts[$urlPartsCheckIndex]=='create') {
                 $create = true;
-            }elseif ($urlParts[$urlPartsCheckIndex]=='delete') {
+            } elseif ($urlParts[$urlPartsCheckIndex]=='delete') {
                 $deleteid = $urlParts[$urlPartsCheckIndex+1];
 
-                if($deleteid){
+                if ($deleteid) {
                     $delete = true;
                 }
             }
@@ -63,8 +63,8 @@ class Webhooks extends BuildTask
             echo "<pre>";
         }
 
-        if($create){
-            foreach($webhooks_create as $webhook => $address){
+        if ($create) {
+            foreach ($webhooks_create as $webhook => $address) {
                 $data = [
                     'form_params' => [
                         "webhook" => [
@@ -85,8 +85,7 @@ class Webhooks extends BuildTask
 
             echo '<h2>Webhooks Created!</h2>';
             echo '<hr />';
-
-        }elseif($delete){
+        } elseif ($delete) {
             try {
                 $response = $client->deleteWebhook($deleteid);
                 echo '<h2>Webhook Deleted!</h2>';
@@ -96,7 +95,6 @@ class Webhooks extends BuildTask
                 echo($e->getMessage());
             }
         }
-
 
         try {
             $response = $client->getWebhooks();
@@ -108,7 +106,7 @@ class Webhooks extends BuildTask
         if (($webhooks = $response->getBody()->getContents()) && $webhooks = Convert::json2obj($webhooks)) {
             echo '<h2>Webhooks</h2>';
             echo '<ul>';
-            foreach($webhooks->webhooks as $webhook){
+            foreach ($webhooks->webhooks as $webhook) {
                 echo '<li>';
                 echo 'Topic: '.$webhook->topic.' (<a href="/dev/tasks/Swordfox-Shopify-Task-Webhooks/delete/'.$webhook->id.'">Delete</a>)';
                 echo '<br />Address: '.$webhook->address;
@@ -123,6 +121,6 @@ class Webhooks extends BuildTask
             echo "</pre>";
         }
 
-        exit;
+        exit('Done');
     }
 }

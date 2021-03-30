@@ -49,6 +49,8 @@ class Client
      */
     public $api_limit = null;
 
+    public $cron_interval = null;
+
     /**
      * @var \GuzzleHttp\Client|null
      */
@@ -96,6 +98,17 @@ class Client
     public function collections($type)
     {
         return $this->client->request('GET', 'admin/api/'.$this->api_version.'/'.$type.'.json?limit='.$this->api_limit);
+    }
+
+    /**
+     * Get the connections between Products and Collections
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function collects($product_id)
+    {
+        return $this->client->request('GET', 'admin/collects.json?order=updated_at+desc&limit=250&product_id='.$product_id);
     }
 
     /**
@@ -167,6 +180,10 @@ class Client
 
         if (!$this->api_version = self::config()->get('api_version')) {
             $this->api_version = '2021-01';
+        }
+
+        if (!$this->cron_interval = self::config()->get('cron_interval')) {
+            $this->cron_interval = '-12 hours'; // Default to 12 hours
         }
 
         $this->client = new \GuzzleHttp\Client([
