@@ -227,7 +227,7 @@ class ShopifyPageController extends \PageController
                 if ($type == 'product') {
                     $this->importProduct($vars);
                 } elseif ($type == 'collection') {
-                    $this->importCollection($vars);
+                    $this->importCollection($vars, $client=null, '-1 hour');
                 }
             }
 
