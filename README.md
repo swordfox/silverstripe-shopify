@@ -52,7 +52,7 @@ Swordfox\Shopify\Client:
   hide_if_no_image: false
   new_based_on: 'Created' # LastEdited or ImageAdded (use with hide_if_no_image)
   new_timeframe: '+7 days' # strtotime('+7 days')
-  cron_interval: '-12 hours' # strtotime('-12 hours')
+  cron_interval: '-18 hours' # Allow for timezone offset, e.g. if your timezone is +12:00, add your cron_interval to that as a negative value. So if your cron runs every 6 hours, set the cron_interval to '-18 hours'
 
 # Override $default_sort
 Swordfox\Shopify\Model\Product:

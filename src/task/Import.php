@@ -65,6 +65,7 @@ class Import extends BuildTask
         } else if ($productsall) {
             $this->importProductsAll($client);
         } else {
+            $this->importCollections($client, 'custom_collections', $client->cron_interval);
             $this->importCollections($client, 'smart_collections', $client->cron_interval);
             $this->importProducts($client);
         }
