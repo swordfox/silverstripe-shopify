@@ -9,6 +9,7 @@ Swordfox\Shopify\Model\ShopifyPageController:
 Swordfox\Shopify\Task\Import:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
+  sleep_microseconds_after_request: 500000
 
 Swordfox\Shopify\Task\DeleteOnShopify:
   extensions:
