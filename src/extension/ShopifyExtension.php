@@ -381,7 +381,7 @@ class ShopifyExtension extends DataExtension
     {
         $time = $this->owner->config()->sleep_microseconds_after_request;
         if (isset($time) && is_numeric($time)) {
-            usleep(500000);
+            usleep($time);
         }
     }
 
