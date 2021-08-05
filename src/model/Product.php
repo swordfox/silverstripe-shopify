@@ -160,7 +160,9 @@ class Product extends DataObject
             ReadonlyField::create('Vendor'),
             ReadonlyField::create('ProductType'),
             ReadonlyField::create('OriginalSrc', 'Main Image'),
-            ReadonlyField::create('DeleteOnShopify')
+            ReadonlyField::create('DeleteOnShopify'),
+            ReadonlyField::create('ImageAdded'),
+            ReadonlyField::create('Active')
         ]);
 
         $fields->addFieldsToTab('Root.Variants', [

@@ -285,7 +285,7 @@ use Swordfox\Shopify\Model\ProductTag;
 
      public function deleteProducts($client)
      {
-         if ($products = Product::get()->where("DeleteOnShopify <= CURDATE() AND DeleteOnShopify != '0000-00-00'")) {
+         if ($products = Product::get()->where("DeleteOnShopify <= CURDATE() AND DeleteOnShopify != '0000-00-00' AND DeleteOnShopify IS NOT NULL")) {
              foreach ($products as $product) {
                  $product_id = $product->ShopifyID;
 
