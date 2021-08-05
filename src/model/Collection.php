@@ -75,8 +75,7 @@ class Collection extends DataObject
     private static $many_many_extraFields = [
         'Products' => [
             'SortValue' => 'Varchar',
-            'Position' => 'Int',
-            'Featured' => 'Boolean'
+            'Position' => 'Int'
         ],
     ];
 

@@ -61,7 +61,7 @@ class ShopifyPageController extends \PageController
         $request = $this->getRequest();
         $this->start = ($request->getVar('start') ? $request->getVar('start') : 0);
 
-        $Products = Product::get();
+        $Products = Product::get()->filter(['Active'=>1]);
 
         if ($this->hide_if_no_image) {
             $Products = $Products->where('OriginalSrc IS NOT NULL');
@@ -95,7 +95,7 @@ class ShopifyPageController extends \PageController
         }
 
         /** @var Collection $Collection */
-        if (!$Collection = DataObject::get_one(Collection::class, ['URLSegment' => $urlSegment])) {
+        if (!$Collection = DataObject::get_one(Collection::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
         }
 
@@ -113,6 +113,8 @@ class ShopifyPageController extends \PageController
 
             $Products = $Collection->Products();
         }
+
+        $Products = $Products->filter(['Active'=>1]);
 
         if ($sort) {
             switch ($sort) {
@@ -167,7 +169,7 @@ class ShopifyPageController extends \PageController
         }
 
         /** @var Product $Product */
-        if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment])) {
+        if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
         }
 

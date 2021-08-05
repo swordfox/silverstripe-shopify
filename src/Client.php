@@ -81,12 +81,12 @@ class Client
      */
     public function product($product_id)
     {
-        return $this->client->request('GET', "admin/api/'.$this->api_version.'/products/$product_id.json");
+        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json');
     }
 
     public function deleteProduct($product_id)
     {
-        return $this->client->request('DELETE', "admin/api/'.$this->api_version.'/products/$product_id.json");
+        return $this->client->request('DELETE', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json');
     }
 
     /**
@@ -191,7 +191,8 @@ class Client
             'headers' => [
                 'Content-Type' => 'application/json; charset=utf-8',
                 'Authorization' => 'Basic ' . base64_encode("$key:$password")
-            ]
+            ],
+            'verify' => false
         ]);
     }
 }

@@ -12,6 +12,7 @@ use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBInt;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\TagField\TagField;
@@ -80,7 +81,8 @@ class Product extends DataObject
         'Tags' => 'Varchar',
         'OriginalSrc' => 'Varchar',
         'DeleteOnShopify' => 'Date',
-        'ImageAdded' => 'DBDatetime'
+        'ImageAdded' => 'DBDatetime',
+        'Active' => 'Boolean(1)'
     ];
 
     private static $data_map = [
@@ -131,8 +133,14 @@ class Product extends DataObject
         'Title',
         'Vendor',
         'ProductType',
-        'ShopifyID'
+        'ShopifyID',
+        'IsActive' => 'Active'
     ];
+
+    public function IsActive()
+    {
+        return DBField::create_field('Varchar', ($this->Active ? 'Yes' : 'No'));
+    }
 
     public function onBeforeWrite()
     {
@@ -243,6 +251,9 @@ class Product extends DataObject
         } else {
             $product->New = 0;
         }
+
+        // Update the status
+        $product->Active = ($shopifyProduct->status == 'active' ? 1 : 0);
 
         // Create the images
         if (!empty($shopifyProduct->images)) {

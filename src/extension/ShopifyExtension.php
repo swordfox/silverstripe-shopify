@@ -228,8 +228,7 @@ use Swordfox\Shopify\Model\ProductTag;
                      $collection->Products()->add($product, [
                          'ShopifyID' => $shopifyCollect->id,
                          'SortValue' => $shopifyCollect->sort_value,
-                         'Position' => $shopifyCollect->position,
-                         'Featured' => $shopifyCollect->featured
+                         'Position' => $shopifyCollect->position
                      ]);
                      self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
 
@@ -286,7 +285,7 @@ use Swordfox\Shopify\Model\ProductTag;
 
      public function deleteProducts($client)
      {
-         if ($products = Product::get()->where('DeleteOnShopify=CURDATE()')) {
+         if ($products = Product::get()->where("DeleteOnShopify <= CURDATE() AND DeleteOnShopify != '0000-00-00'")) {
              foreach ($products as $product) {
                  $product_id = $product->ShopifyID;
 
