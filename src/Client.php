@@ -7,6 +7,7 @@ use SilverStripe\Core\Config\Configurable;
 
 /**
  * Class Client
+ *
  * @package Swordfox\Shopify
  *
  * @author Graham McLellan
@@ -86,7 +87,16 @@ class Client
 
     public function deleteProduct($product_id)
     {
-        return $this->client->request('DELETE', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json');
+        $data = [
+            'form_params' => [
+              "product" => [
+                "id" => $product_id,
+                "status" => "archived"
+              ]
+            ]
+        ];
+
+        return $this->client->request('PUT', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json', $data);
     }
 
     /**
@@ -186,13 +196,15 @@ class Client
             $this->cron_interval = '-12 hours'; // Default to 12 hours
         }
 
-        $this->client = new \GuzzleHttp\Client([
+        $this->client = new \GuzzleHttp\Client(
+            [
             'base_uri' => "https://$domain",
             'headers' => [
                 'Content-Type' => 'application/json; charset=utf-8',
                 'Authorization' => 'Basic ' . base64_encode("$key:$password")
             ],
             'verify' => false
-        ]);
+            ]
+        );
     }
 }
