@@ -26,8 +26,8 @@ use Swordfox\Shopify\Client;
 /**
  * Class Product
  *
- * @author Graham McLellan
- * @package Swordfox\Shopify
+ * @author     Graham McLellan
+ * @package    Swordfox\Shopify
  * @subpackage Model
  *
  * @mixin Versioned
@@ -41,7 +41,7 @@ use Swordfox\Shopify\Client;
  * @property string Tags
  *
  * @property int ImageID
- * @method Image Image()
+ * @method   Image Image()
  *
  * @method HasManyList Variants()
  * @method HasManyList Images()
@@ -81,6 +81,7 @@ class Product extends DataObject
         'Tags' => 'Varchar',
         'OriginalSrc' => 'Varchar',
         'DeleteOnShopify' => 'Date',
+        'DeleteOnShopifyDone' => 'Boolean',
         'ImageAdded' => 'DBDatetime',
         'Active' => 'Boolean(1)'
     ];
@@ -152,7 +153,8 @@ class Product extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $fields->addFieldsToTab('Root.Main', [
+        $fields->addFieldsToTab(
+            'Root.Main', [
             ReadonlyField::create('Title'),
             ReadonlyField::create('URLSegment'),
             ReadonlyField::create('ShopifyID'),
@@ -161,21 +163,29 @@ class Product extends DataObject
             ReadonlyField::create('ProductType'),
             ReadonlyField::create('OriginalSrc', 'Main Image'),
             ReadonlyField::create('DeleteOnShopify'),
+            ReadonlyField::create('DeleteOnShopifyDone'),            
             ReadonlyField::create('ImageAdded'),
             ReadonlyField::create('Active')
-        ]);
+            ]
+        );
 
-        $fields->addFieldsToTab('Root.Variants', [
+        $fields->addFieldsToTab(
+            'Root.Variants', [
             GridField::create('Variants', 'Variants', $this->Variants(), GridFieldConfig_RecordViewer::create())
-        ]);
+            ]
+        );
 
-        $fields->addFieldsToTab('Root.Images', [
+        $fields->addFieldsToTab(
+            'Root.Images', [
             GridField::create('Images', 'Images', $this->Images(), GridFieldConfig_RecordViewer::create())
-        ]);
+            ]
+        );
 
-        $fields->addFieldsToTab('Root.Tags', [
+        $fields->addFieldsToTab(
+            'Root.Tags', [
             GridField::create('Tags', 'Tags', $this->Tags(), GridFieldConfig_RecordViewer::create())
-        ]);
+            ]
+        );
 
         $fields->removeByName(['LinkTracking','FileTracking']);
         return $fields;
@@ -238,7 +248,7 @@ class Product extends DataObject
      * Creates a new Shopify Product from the given data
      * but does not publish it
      *
-     * @param $shopifyProduct
+     * @param  $shopifyProduct
      * @return Product
      * @throws \SilverStripe\ORM\ValidationException
      */
