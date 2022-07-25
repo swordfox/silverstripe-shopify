@@ -10,7 +10,7 @@ use Swordfox\Shopify\Task\Import;
 /**
  * Class ProductVariant
  *
- * @author Graham McLellan
+ * @author  Graham McLellan
  * @package Swordfox\Shopify\Model
  *
  * @property string Title
@@ -31,9 +31,9 @@ use Swordfox\Shopify\Task\Import;
  * @property boolean RequiresShipping
  *
  * @property int ProductID
- * @method Product Product()
+ * @method   Product Product()
  * @property int ImageID
- * @method Image Image()
+ * @method   Image Image()
  */
 class ProductVariant extends DataObject
 {
@@ -100,6 +100,12 @@ class ProductVariant extends DataObject
         'ShopifyID'
     ];
 
+    private static $searchable_fields = [
+        'Title' => ['title' => 'Title'],
+        'SKU' => ['title' => 'SKU'],
+        'ShopifyID' => ['title' => 'ShopifyID']
+    ];
+
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
@@ -110,7 +116,7 @@ class ProductVariant extends DataObject
     /**
      * Creates a new Shopify Variant from the given data
      *
-     * @param $shopifyVariant
+     * @param  $shopifyVariant
      * @return ProductVariant
      * @throws \SilverStripe\ORM\ValidationException
      */

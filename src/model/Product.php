@@ -138,6 +138,13 @@ class Product extends DataObject
         'IsActive' => 'Active'
     ];
 
+    private static $searchable_fields = [
+        'Title' => ['title' => 'Title'],
+        'Vendor' => ['title' => 'Vendor'],
+        'ProductType' => ['title' => 'ProductType'],
+        'ShopifyID' => ['title' => 'ShopifyID']
+    ];
+
     public function IsActive()
     {
         return DBField::create_field('Varchar', ($this->Active ? 'Yes' : 'No'));
@@ -163,7 +170,7 @@ class Product extends DataObject
             ReadonlyField::create('ProductType'),
             ReadonlyField::create('OriginalSrc', 'Main Image'),
             ReadonlyField::create('DeleteOnShopify'),
-            ReadonlyField::create('DeleteOnShopifyDone'),            
+            ReadonlyField::create('DeleteOnShopifyDone'),
             ReadonlyField::create('ImageAdded'),
             ReadonlyField::create('Active')
             ]
