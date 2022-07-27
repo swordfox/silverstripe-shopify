@@ -15,6 +15,7 @@ use Swordfox\Shopify\Client;
 
 /**
  * Class ShopifyPageController
+ *
  * @mixin ShopifyPage
  */
 class ShopifyPageController extends \PageController
@@ -22,6 +23,7 @@ class ShopifyPageController extends \PageController
     public $start;
     public $hide_out_of_stock;
     public $hide_if_no_image;
+    public $hide_if_collection_not_active;
     public $storefront_access_token;
 
     private static $allowed_actions = [
@@ -43,6 +45,8 @@ class ShopifyPageController extends \PageController
 
         $this->hide_out_of_stock = Client::config()->get('hide_out_of_stock');
         $this->hide_if_no_image = Client::config()->get('hide_if_no_image');
+        $this->hide_if_collection_not_active = Client::config()->get('hide_if_collection_not_active');
+
         $this->shopify_domain = Client::config()->get('shopify_domain');
         $this->storefront_access_token = Client::config()->get('storefront_access_token');
     }
@@ -63,8 +67,14 @@ class ShopifyPageController extends \PageController
 
         $Products = Product::get()->filter(['Active'=>1]);
 
+        if ($this->hide_if_collection_not_active) {
+            $Products = $Products
+                ->innerJoin('ShopifyCollection_Products', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct.ID')
+                ->innerJoin('ShopifyCollection', 'ShopifyCollection.ID = ShopifyCollection_Products.ShopifyCollectionID AND ShopifyCollection.Active = 1');
+        }
+
         if ($this->hide_if_no_image) {
-            $Products = $Products->where('OriginalSrc IS NOT NULL');
+            $Products = $Products->where('ShopifyProduct.OriginalSrc IS NOT NULL');
         }
 
         if ($this->hide_out_of_stock) {
@@ -94,7 +104,9 @@ class ShopifyPageController extends \PageController
             $this->httpError(404);
         }
 
-        /** @var Collection $Collection */
+        /**
+ * @var Collection $Collection
+*/
         if (!$Collection = DataObject::get_one(Collection::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
         }
@@ -118,28 +130,28 @@ class ShopifyPageController extends \PageController
 
         if ($sort) {
             switch ($sort) {
-                case 'title':
-                    $sortvar = 'Title';
-                    break;
+            case 'title':
+                $sortvar = 'Title';
+                break;
 
-                case 'titledesc':
-                    $sortvar = 'Title DESC';
-                    break;
+            case 'titledesc':
+                $sortvar = 'Title DESC';
+                break;
 
-                case 'created':
-                    $sortvar = 'Created';
-                    break;
+            case 'created':
+                $sortvar = 'Created';
+                break;
 
-                default:
-                    $sortvar = 'Created DESC';
-                    break;
+            default:
+                $sortvar = 'Created DESC';
+                break;
             }
 
             $Products = $Products->sort($sortvar);
         }
 
         if ($this->hide_if_no_image) {
-            $Products = $Products->where('OriginalSrc IS NOT NULL');
+            $Products = $Products->where('ShopifyCollection.OriginalSrc IS NOT NULL');
         }
 
         if ($this->hide_out_of_stock) {
@@ -168,7 +180,9 @@ class ShopifyPageController extends \PageController
             $this->httpError(404);
         }
 
-        /** @var Product $Product */
+        /**
+ * @var Product $Product
+*/
         if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
         }
