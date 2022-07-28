@@ -105,7 +105,7 @@ class ShopifyPageController extends \PageController
         }
 
         /**
- * @var Collection $Collection
+ *      @var Collection $Collection
 */
         if (!$Collection = DataObject::get_one(Collection::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
@@ -151,7 +151,7 @@ class ShopifyPageController extends \PageController
         }
 
         if ($this->hide_if_no_image) {
-            $Products = $Products->where('ShopifyCollection.OriginalSrc IS NOT NULL');
+            $Products = $Products->where('ShopifyProduct.OriginalSrc IS NOT NULL');
         }
 
         if ($this->hide_out_of_stock) {
@@ -181,7 +181,7 @@ class ShopifyPageController extends \PageController
         }
 
         /**
- * @var Product $Product
+ *      @var Product $Product
 */
         if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
