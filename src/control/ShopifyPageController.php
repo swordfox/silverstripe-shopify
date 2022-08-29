@@ -251,6 +251,7 @@ class ShopifyPageController extends \PageController
                 if (property_exists($vars, 'inventory_item_id')) {
                     if ($productvariant = ProductVariant::get()->where('InventoryItemID = '.$vars->inventory_item_id)->first()) {
                         $productvariant->Inventory = $vars->available;
+                        $productvariant->Location = $vars->location_id;
                         $productvariant->write();
                     }
                 }

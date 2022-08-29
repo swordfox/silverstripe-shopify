@@ -48,6 +48,8 @@ class Import extends BuildTask
                 $productsonly = true;
             } elseif ($urlParts[$urlPartsCheckIndex]=='productsall') {
                 $productsall = true;
+            } elseif ($urlParts[$urlPartsCheckIndex]=='productsingle') {
+                $productssingle = $urlParts[$urlPartsCheckIndex+1];
             } elseif ($urlParts[$urlPartsCheckIndex]=='collectionsonly') {
                 $collectionsonly = true;
             }
@@ -64,6 +66,8 @@ class Import extends BuildTask
             $this->importCollections($client, 'smart_collections');
         } else if ($productsall) {
             $this->importProductsAll($client);
+        } else if ($productssingle) {
+            $this->importProductsSingle($client, $productssingle);
         } else {
             $this->importCollections($client, 'custom_collections', $client->cron_interval);
             $this->importCollections($client, 'smart_collections', $client->cron_interval);

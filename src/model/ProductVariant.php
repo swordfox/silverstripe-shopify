@@ -56,7 +56,8 @@ class ProductVariant extends DataObject
         'Weight' => 'Decimal',
         'WeightUnit' => 'Varchar',
         'InventoryItemID' => 'Varchar',
-        'RequiresShipping' => 'Boolean'
+        'RequiresShipping' => 'Boolean',
+        'Location' => 'Int'
     ];
 
     private static $default_sort = 'Sort';

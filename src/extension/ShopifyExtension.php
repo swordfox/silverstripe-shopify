@@ -76,6 +76,22 @@ class ShopifyExtension extends DataExtension
         } while (!is_null($methodUri) && strlen($methodUri) > 0);
     }
 
+    /**
+     * Import a shopify product
+     *
+     * @param Client $client
+     *
+     * @throws \Exception
+     */
+    public function importProductsSingle(Client $client, $product_id)
+    {
+        $product = $client->product($product_id);
+
+        if (($product = $product->getBody()->getContents()) && $product = Convert::json2obj($product)) {
+            $this->importProduct($product->product, $client);
+        }
+    }
+
     public function importProduct($shopifyProduct, $client=null)
     {
         $hide_if_no_image = Client::config()->get('hide_if_no_image');
