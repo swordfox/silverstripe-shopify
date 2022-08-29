@@ -261,6 +261,36 @@ class ShopifyExtension extends DataExtension
         return $allcollections;
     }
 
+    /**
+     * Import the shopify inventory_levels
+     *
+     * @param Client $client
+     *
+     * @throws \Exception
+     */
+    public function updateInventoryLocation(Client $client, $location_id)
+    {
+        $methodUri = 'admin/api/'.$client->api_version.'/locations/'.$location_id.'/inventory_levels.json?limit=250';
+
+        do {
+            $inventory_levels = $client->paginationCall($methodUri);
+            $headerLink = $inventory_levels->getHeader('Link');
+
+            if (($inventory_levels = $inventory_levels->getBody()->getContents()) && $inventory_levels = Convert::json2obj($inventory_levels)) {
+                foreach ($inventory_levels->inventory_levels as $inventory_level) {
+                    if ($ProductVariant = ProductVariant::get()->filter(['InventoryItemID' => $inventory_level->inventory_item_id])->first() and $inventory_level->available > 0) {
+                        $ProductVariant->Location = $inventory_level->location_id;
+                        $ProductVariant->write();
+
+                        self::log("[{$ProductVariant->ID}] Inventory Item updated '{$inventory_level->inventory_item_id}'", self::SUCCESS);
+                    }
+                }
+            }
+
+            $methodUri = $this->methodUri($headerLink);
+        } while (!is_null($methodUri) && strlen($methodUri) > 0);
+    }
+
     public function methodUri($headerLink)
     {
         $methodUri = null;

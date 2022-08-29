@@ -14,6 +14,10 @@ Swordfox\Shopify\Task\DeleteOnShopify:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
 
+Swordfox\Shopify\Task\InventoryLocation:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension
+
 Swordfox\Shopify\Model\Product:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension

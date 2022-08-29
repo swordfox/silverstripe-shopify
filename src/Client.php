@@ -85,6 +85,19 @@ class Client
         return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json');
     }
 
+    /**
+     * Get a list of available locations
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function locations()
+    {
+        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/locations.json');
+    }
+
     public function deleteProduct($product_id)
     {
         $data = [
