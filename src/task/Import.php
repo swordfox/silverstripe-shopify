@@ -38,6 +38,7 @@ class Import extends BuildTask
 
         $productsonly = false;
         $productsall = false;
+        $productssingle = false;
         $collectionsonly = false;
 
         $urlParts = explode('/', $_SERVER['REQUEST_URI']);
