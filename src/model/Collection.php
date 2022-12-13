@@ -127,19 +127,16 @@ class Collection extends DataObject
 
         $ProductTags = ProductTag::get()
             ->innerJoin('ShopifyProduct_Tags', 'ShopifyProduct_Tags.ShopifyProductTagID = ShopifyProductTag.ID')
-            ->innerJoin('ShopifyCollection_Products', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyCollection_Products.ShopifyCollectionID = '.$this->ID)
-        ;
+            ->innerJoin('ShopifyCollection_Products', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyCollection_Products.ShopifyCollectionID = ' . $this->ID);
 
         if ($hide_if_no_image) {
             $ProductTags = $ProductTags->innerJoin('ShopifyProduct', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct.ID AND ShopifyProduct.OriginalSrc IS NOT NULL');
         }
 
-        /*
         if ($hide_out_of_stock) {
             $ProductTags = $ProductTags->innerJoin('ShopifyProduct', 'ShopifyCollection_Products.ShopifyProductID = ShopifyProduct.ID');
             $ProductTags = $ProductTags->innerJoin('ShopifyProductVariant', 'ShopifyProductVariant.ProductID = ShopifyProduct.ID AND ShopifyProductVariant.Inventory > 0');
         }
-        */
 
         return $ProductTags;
     }
