@@ -40,13 +40,7 @@ class InventoryLocation extends BuildTask
             exit($e->getMessage());
         }
 
-        $locations = $client->locations();
-
-        if (($locations = $locations->getBody()->getContents()) && $locations = Convert::json2obj($locations)) {
-            foreach ($locations->locations as $location) {
-                $this->updateInventoryLocation($client, $location->id);
-            }
-        }
+        $this->updateInventoryLocation($client);
 
         if (!Director::is_cli()) {
             echo "</pre>";

@@ -36,7 +36,7 @@ class ShopifyExtension extends DataExtension
      *
      * @throws \Exception
      */
-    public function importProducts(Client $client, $all=false, $since_id=0)
+    public function importProducts(Client $client, $all = false, $since_id = 0)
     {
         try {
             $products = $client->products();
@@ -60,7 +60,7 @@ class ShopifyExtension extends DataExtension
      */
     public function importProductsAll(Client $client)
     {
-        $methodUri = 'admin/api/'.$client->api_version.'/products.json?limit=250';
+        $methodUri = 'admin/api/' . $client->api_version . '/products.json?limit=250';
 
         do {
             $products = $client->paginationCall($methodUri);
@@ -92,7 +92,7 @@ class ShopifyExtension extends DataExtension
         }
     }
 
-    public function importProduct($shopifyProduct, $client=null)
+    public function importProduct($shopifyProduct, $client = null)
     {
         $hide_if_no_image = Client::config()->get('hide_if_no_image');
         $delete_on_shopify = Client::config()->get('delete_on_shopify');
@@ -101,7 +101,7 @@ class ShopifyExtension extends DataExtension
         // Create the product
         if ($product = $this->importObject(Product::class, $shopifyProduct)) {
             // If $hide_if_no_image and no images then don't update connections
-            if($hide_if_no_image and !$product->OriginalSrc) {
+            if ($hide_if_no_image and !$product->OriginalSrc) {
                 // Publish the product and it's connections
                 $product->publishRecursive();
                 self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
@@ -149,7 +149,7 @@ class ShopifyExtension extends DataExtension
      *
      * @throws \SilverStripe\ORM\ValidationException
      */
-    public function importCollections(Client $client, $type, $updatedatmin=false)
+    public function importCollections(Client $client, $type, $updatedatmin = false)
     {
         try {
             $collections = $client->collections($type);
@@ -164,7 +164,7 @@ class ShopifyExtension extends DataExtension
         }
     }
 
-    public function importCollection($shopifyCollection, $client=null, $updatedatmin=false)
+    public function importCollection($shopifyCollection, $client = null, $updatedatmin = false)
     {
         if ($shopifyCollection->published_scope == 'global' or $shopifyCollection->published_scope == 'web') {
             // Create the collection
@@ -187,7 +187,7 @@ class ShopifyExtension extends DataExtension
                 $currentproducts = $collection->Products();
                 $allproducts = [];
 
-                $methodUri = 'admin/api/'.$client->api_version.'/products.json?collection_id='.$collection->ShopifyID.'&limit=250'.($updatedatmin ? ('&updated_at_min='.date(DATE_ATOM, strtotime($updatedatmin))) : '');
+                $methodUri = 'admin/api/' . $client->api_version . '/products.json?collection_id=' . $collection->ShopifyID . '&limit=250' . ($updatedatmin ? ('&updated_at_min=' . date(DATE_ATOM, strtotime($updatedatmin))) : '');
 
                 do {
                     $products = $client->paginationCall($methodUri);
@@ -245,11 +245,12 @@ class ShopifyExtension extends DataExtension
                     && ($product = Product::getByShopifyID($shopifyCollect->product_id))
                 ) {
                     $collection->Products()->add(
-                        $product, [
-                        'ShopifyID' => $shopifyCollect->id,
-                        'SortValue' => $shopifyCollect->sort_value,
-                        'Position' => $shopifyCollect->position
-                         ]
+                        $product,
+                        [
+                            'ShopifyID' => $shopifyCollect->id,
+                            'SortValue' => $shopifyCollect->sort_value,
+                            'Position' => $shopifyCollect->position
+                        ]
                     );
                     self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
 
@@ -268,27 +269,52 @@ class ShopifyExtension extends DataExtension
      *
      * @throws \Exception
      */
-    public function updateInventoryLocation(Client $client, $location_id)
+    public function updateInventoryLocation(Client $client)
     {
-        $methodUri = 'admin/api/'.$client->api_version.'/locations/'.$location_id.'/inventory_levels.json?limit=250';
+        $Count = 0;
 
         do {
-            $inventory_levels = $client->paginationCall($methodUri);
-            $headerLink = $inventory_levels->getHeader('Link');
+            $PreviousCount = $Count;
+            $ProductVariants = ProductVariant::get()->filter(['Location' => 0])->where('Inventory > 0');
 
-            if (($inventory_levels = $inventory_levels->getBody()->getContents()) && $inventory_levels = Convert::json2obj($inventory_levels)) {
-                foreach ($inventory_levels->inventory_levels as $inventory_level) {
-                    if ($ProductVariant = ProductVariant::get()->filter(['InventoryItemID' => $inventory_level->inventory_item_id])->first() and $inventory_level->available > 0) {
-                        $ProductVariant->Location = $inventory_level->location_id;
-                        $ProductVariant->write();
+            $Count = $ProductVariants->count();
 
-                        self::log("[{$ProductVariant->ID}] Inventory Item updated '{$inventory_level->inventory_item_id}'", self::SUCCESS);
-                    }
+            $i = 0;
+            $InventoryItemIDs = '';
+            foreach ($ProductVariants as $ProductVariant) {
+                if ($ProductVariant->InventoryItemID) {
+                    $InventoryItemIDs .= $ProductVariant->InventoryItemID . ',';
+
+                    $i++;
+                }
+
+                if ($i == 50) {
+                    break;
                 }
             }
 
-            $methodUri = $this->methodUri($headerLink);
-        } while (!is_null($methodUri) && strlen($methodUri) > 0);
+            if ($InventoryItemIDs != '') {
+                $InventoryItemIDs = substr($InventoryItemIDs, 0, -1);
+
+                $methodUri = 'admin/api/' . $client->api_version . '/inventory_levels.json?inventory_item_ids=' . $InventoryItemIDs . '&limit=250';
+
+                $inventory_levels = $client->paginationCall($methodUri);
+                //$headerLink = $inventory_levels->getHeader('Link');
+
+                if (($inventory_levels = $inventory_levels->getBody()->getContents()) && $inventory_levels = Convert::json2obj($inventory_levels)) {
+                    foreach ($inventory_levels->inventory_levels as $inventory_level) {
+                        if ($ProductVariant = ProductVariant::get()->filter(['InventoryItemID' => $inventory_level->inventory_item_id])->first() and $inventory_level->available > 0) {
+                            $ProductVariant->Location = $inventory_level->location_id;
+                            $ProductVariant->write();
+
+                            self::log("[{$ProductVariant->ID}] Inventory Item updated '{$inventory_level->inventory_item_id}'", self::SUCCESS);
+                        }
+                    }
+                }
+
+                //$methodUri = $this->methodUri($headerLink);
+            }
+        } while ($PreviousCount != $Count);
     }
 
     public function methodUri($headerLink)
@@ -302,7 +328,7 @@ class ShopifyExtension extends DataExtension
                 if (strlen($link) > 0 && strpos($headerLink[0], '>; rel="previous"') > 0) {
                     $strposrelprev = strpos($headerLink[0], '>; rel="previous"');
 
-                    $methodUri = trim(substr($headerLink[0], $strposrelprev+20, -13));
+                    $methodUri = trim(substr($headerLink[0], $strposrelprev + 20, -13));
                 } else {
                     $methodUri = trim(substr($headerLink[0], 1, -13));
                 }
@@ -363,19 +389,19 @@ class ShopifyExtension extends DataExtension
     public static function log($message, $code = self::NOTICE)
     {
         switch ($code) {
-        case self::ERROR:
-            echo "[ ERROR ] {$message}\n";
-            break;
-        case self::WARN:
-            echo "[WARNING] {$message}\n";
-            break;
-        case self::SUCCESS:
-            echo "[SUCCESS] {$message}\n";
-            break;
-        case self::NOTICE:
-        default:
-            echo "[NOTICE ] {$message}\n";
-            break;
+            case self::ERROR:
+                echo "[ ERROR ] {$message}\n";
+                break;
+            case self::WARN:
+                echo "[WARNING] {$message}\n";
+                break;
+            case self::SUCCESS:
+                echo "[SUCCESS] {$message}\n";
+                break;
+            case self::NOTICE:
+            default:
+                echo "[NOTICE ] {$message}\n";
+                break;
         }
     }
 
