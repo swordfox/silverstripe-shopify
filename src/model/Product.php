@@ -83,7 +83,8 @@ class Product extends DataObject
         'DeleteOnShopify' => 'Date',
         'DeleteOnShopifyDone' => 'Boolean',
         'ImageAdded' => 'DBDatetime',
-        'Active' => 'Boolean(1)'
+        'Active' => 'Boolean(1)',
+        'Online' => 'Boolean(1)'
     ];
 
     private static $data_map = [
@@ -135,7 +136,8 @@ class Product extends DataObject
         'Vendor',
         'ProductType',
         'ShopifyID',
-        'IsActive' => 'Active'
+        'Active.Nice' => 'Active',
+        'Online.Nice' => 'Online'
     ];
 
     private static $searchable_fields = [
@@ -172,7 +174,8 @@ class Product extends DataObject
                 ReadonlyField::create('OriginalSrc', 'Main Image'),
                 ReadonlyField::create('DeleteOnShopify'),
                 ReadonlyField::create('DeleteOnShopifyDone'),
-                ReadonlyField::create('ImageAdded')
+                ReadonlyField::create('ImageAdded'),
+                ReadonlyField::create('Active')
             ]
         );
 

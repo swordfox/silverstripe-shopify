@@ -53,19 +53,19 @@ class ShopifyPageController extends \PageController
 
     public function index()
     {
-        if (Director::is_ajax() or $this->request->getVar('Ajax')=='1') {
-            return $this->customise(array('Ajax'=>1))->renderwith('Swordfox/Shopify/Includes/AllProductsInner');
+        if (Director::is_ajax() or $this->request->getVar('Ajax') == '1') {
+            return $this->customise(array('Ajax' => 1))->renderwith('Swordfox/Shopify/Includes/AllProductsInner');
         } else {
             return array();
         }
     }
 
-    public function AllProducts($Paginated=true)
+    public function AllProducts($Paginated = true)
     {
         $request = $this->getRequest();
         $this->start = ($request->getVar('start') ? $request->getVar('start') : 0);
 
-        $Products = Product::get()->filter(['Active'=>1]);
+        $Products = Product::get()->filter(['Active' => 1, 'Online' => 1]);
 
         if ($this->hide_if_collection_not_active) {
             $Products = $Products
@@ -105,8 +105,8 @@ class ShopifyPageController extends \PageController
         }
 
         /**
- *      @var Collection $Collection
-*/
+         *      @var Collection $Collection
+         */
         if (!$Collection = DataObject::get_one(Collection::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
         }
@@ -116,35 +116,35 @@ class ShopifyPageController extends \PageController
         if ($tagSegment = $request->param('OtherID') and $tag = DataObject::get_one(ProductTag::class, ['URLSegment' => $tagSegment])) {
             $this->SelectedTag = $tag;
 
-            $this->MetaTitle = $tag->Title.' - '.$Collection->Title.' - '.$this->Title;
+            $this->MetaTitle = $tag->Title . ' - ' . $Collection->Title . ' - ' . $this->Title;
 
             $Products = $Collection->Products()
-                ->innerJoin('ShopifyProduct_Tags', 'ShopifyProduct.ID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyProduct_Tags.ShopifyProductTagID = '.$tag->ID);
+                ->innerJoin('ShopifyProduct_Tags', 'ShopifyProduct.ID = ShopifyProduct_Tags.ShopifyProductID AND ShopifyProduct_Tags.ShopifyProductTagID = ' . $tag->ID);
         } else {
-            $this->MetaTitle = $Collection->Title.' - '.$this->Title;
+            $this->MetaTitle = $Collection->Title . ' - ' . $this->Title;
 
             $Products = $Collection->Products();
         }
 
-        $Products = $Products->filter(['Active'=>1]);
+        $Products = $Products->filter(['Active' => 1, 'Online' => 1]);
 
         if ($sort) {
             switch ($sort) {
-            case 'title':
-                $sortvar = 'Title';
-                break;
+                case 'title':
+                    $sortvar = 'Title';
+                    break;
 
-            case 'titledesc':
-                $sortvar = 'Title DESC';
-                break;
+                case 'titledesc':
+                    $sortvar = 'Title DESC';
+                    break;
 
-            case 'created':
-                $sortvar = 'Created';
-                break;
+                case 'created':
+                    $sortvar = 'Created';
+                    break;
 
-            default:
-                $sortvar = 'Created DESC';
-                break;
+                default:
+                    $sortvar = 'Created DESC';
+                    break;
             }
 
             $Products = $Products->sort($sortvar);
@@ -167,8 +167,8 @@ class ShopifyPageController extends \PageController
 
         $this->extend('updateCollectionView', $Collection);
 
-        if (Director::is_ajax() or $this->request->getVar('Ajax')=='1') {
-            return $Collection->customise(array('Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet, 'start'=>$start, 'SelectedTag'=>$this->SelectedTag))->renderwith('Swordfox/Shopify/Includes/CollectionInner');
+        if (Director::is_ajax() or $this->request->getVar('Ajax') == '1') {
+            return $Collection->customise(array('Ajax' => 1, 'MobileOrTablet' => $this->owner->MobileOrTablet, 'start' => $start, 'SelectedTag' => $this->SelectedTag))->renderwith('Swordfox/Shopify/Includes/CollectionInner');
         } else {
             return $this->render($Collection);
         }
@@ -181,8 +181,8 @@ class ShopifyPageController extends \PageController
         }
 
         /**
- *      @var Product $Product
-*/
+         *      @var Product $Product
+         */
         if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
             $this->httpError(404);
         }
@@ -198,8 +198,8 @@ class ShopifyPageController extends \PageController
 
         $this->extend('updateProductView', $Product);
 
-        if (Director::is_ajax() or $request->getVar('Ajax')=='1') {
-            return $Product->customise(array('Ajax'=>1, 'MobileOrTablet'=>$this->owner->MobileOrTablet))->renderwith('Swordfox/Shopify/Includes/ProductInner');
+        if (Director::is_ajax() or $request->getVar('Ajax') == '1') {
+            return $Product->customise(array('Ajax' => 1, 'MobileOrTablet' => $this->owner->MobileOrTablet))->renderwith('Swordfox/Shopify/Includes/ProductInner');
         } else {
             return $this->render($Product);
         }
@@ -243,13 +243,13 @@ class ShopifyPageController extends \PageController
                 if ($type == 'product') {
                     $this->importProduct($vars);
                 } elseif ($type == 'collection') {
-                    $this->importCollection($vars, $client=null, '-1 hour');
+                    $this->importCollection($vars, $client = null, '-1 hour');
                 }
             }
 
             if ($type == 'inventory') {
                 if (property_exists($vars, 'inventory_item_id')) {
-                    if ($productvariant = ProductVariant::get()->where('InventoryItemID = '.$vars->inventory_item_id)->first()) {
+                    if ($productvariant = ProductVariant::get()->where('InventoryItemID = ' . $vars->inventory_item_id)->first()) {
                         $productvariant->Inventory = $vars->available;
                         $productvariant->Location = $vars->location_id;
                         $productvariant->write();
@@ -258,7 +258,7 @@ class ShopifyPageController extends \PageController
             }
         }
 
-        $file = 'webhook_'.$type.'_update.txt';
+        $file = 'webhook_' . $type . '_update.txt';
         file_put_contents($file, $data);
     }
 
@@ -281,28 +281,28 @@ class ShopifyPageController extends \PageController
                     $product = DataObject::get_one(Product::class, ['ShopifyID' => $id]);
 
                     if ($product) {
-                        $status=$product->Title.' deleted.';
+                        $status = $product->Title . ' deleted.';
                         $product->delete();
                     } else {
-                        $status='Not found.';
+                        $status = 'Not found.';
                     }
                 } elseif ($type == 'collection') {
                     $Collection = DataObject::get_one(Collection::class, ['ShopifyID' => $id]);
 
                     if ($Collection) {
-                        $status=$Collection->Title.' deleted.';
+                        $status = $Collection->Title . ' deleted.';
                         $Collection->delete();
                     } else {
-                        $status='Not found.';
+                        $status = 'Not found.';
                     }
                 }
             }
         } else {
-            $status='Error';
+            $status = 'Error';
         }
 
-        $file = 'webhook_'.$type.'_delete.txt';
-        file_put_contents($file, $data.$status);
+        $file = 'webhook_' . $type . '_delete.txt';
+        file_put_contents($file, $data . $status);
     }
 
     public function webhook_verify($data, $hmac_header)
@@ -317,7 +317,7 @@ class ShopifyPageController extends \PageController
     {
         return $this->customise(
             array(
-                'Products'=>$this->AllProducts($Paginated=false)
+                'Products' => $this->AllProducts($Paginated = false)
             )
         );
     }

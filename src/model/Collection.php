@@ -100,6 +100,11 @@ class Collection extends DataObject
         return DBField::create_field('Varchar', ($this->Active ? 'Yes' : 'No'));
     }
 
+    public function getProducts()
+    {
+        return $this->Products()->filter(['Active' => 1, 'Online' => 1]);
+    }
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
