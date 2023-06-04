@@ -161,49 +161,52 @@ class Product extends DataObject
     {
         $fields = parent::getCMSFields();
         $fields->addFieldsToTab(
-            'Root.Main', [
-            ReadonlyField::create('Title'),
-            ReadonlyField::create('URLSegment'),
-            ReadonlyField::create('ShopifyID'),
-            ReadonlyField::create('Content'),
-            ReadonlyField::create('Vendor'),
-            ReadonlyField::create('ProductType'),
-            ReadonlyField::create('OriginalSrc', 'Main Image'),
-            ReadonlyField::create('DeleteOnShopify'),
-            ReadonlyField::create('DeleteOnShopifyDone'),
-            ReadonlyField::create('ImageAdded'),
-            ReadonlyField::create('Active')
+            'Root.Main',
+            [
+                ReadonlyField::create('Title'),
+                ReadonlyField::create('URLSegment'),
+                ReadonlyField::create('ShopifyID'),
+                ReadonlyField::create('Content'),
+                ReadonlyField::create('Vendor'),
+                ReadonlyField::create('ProductType'),
+                ReadonlyField::create('OriginalSrc', 'Main Image'),
+                ReadonlyField::create('DeleteOnShopify'),
+                ReadonlyField::create('DeleteOnShopifyDone'),
+                ReadonlyField::create('ImageAdded')
             ]
         );
 
         $fields->addFieldsToTab(
-            'Root.Variants', [
-            GridField::create('Variants', 'Variants', $this->Variants(), GridFieldConfig_RecordViewer::create())
+            'Root.Variants',
+            [
+                GridField::create('Variants', 'Variants', $this->Variants(), GridFieldConfig_RecordViewer::create())
             ]
         );
 
         $fields->addFieldsToTab(
-            'Root.Images', [
-            GridField::create('Images', 'Images', $this->Images(), GridFieldConfig_RecordViewer::create())
+            'Root.Images',
+            [
+                GridField::create('Images', 'Images', $this->Images(), GridFieldConfig_RecordViewer::create())
             ]
         );
 
         $fields->addFieldsToTab(
-            'Root.Tags', [
-            GridField::create('Tags', 'Tags', $this->Tags(), GridFieldConfig_RecordViewer::create())
+            'Root.Tags',
+            [
+                GridField::create('Tags', 'Tags', $this->Tags(), GridFieldConfig_RecordViewer::create())
             ]
         );
 
-        $fields->removeByName(['LinkTracking','FileTracking']);
+        $fields->removeByName(['LinkTracking', 'FileTracking']);
         return $fields;
     }
 
-    public function Price($decimals=0)
+    public function Price($decimals = 0)
     {
         $Variant = $this->Variants()->first();
 
         if ($Variant->Inventory > 0) {
-            return '$'.number_format($Variant->Price, $decimals).($Variant->CompareAt ? (' <del>$'.number_format($Variant->CompareAt, $decimals).'</del>') : '');
+            return '$' . number_format($Variant->Price, $decimals) . ($Variant->CompareAt ? (' <del>$' . number_format($Variant->CompareAt, $decimals) . '</del>') : '');
         } elseif ($this->ProductType == 'Gift Card') {
             return '';
         } else {
@@ -233,7 +236,7 @@ class Product extends DataObject
         $new_based_on = ($new_based_on ? $new_based_on : 'Created');
         $new_timeframe = ($new_timeframe ? $new_timeframe : '+7 days');
 
-        if ($this->$new_based_on and strtotime($this->$new_based_on.' '.$new_timeframe) > time()) {
+        if ($this->$new_based_on and strtotime($this->$new_based_on . ' ' . $new_timeframe) > time()) {
             return true;
         }
 
@@ -316,7 +319,7 @@ class Product extends DataObject
         if (!empty($shopifyProduct->variants)) {
             foreach ($shopifyProduct->variants as $shopifyVariant) {
                 // Delete if inventory_quantity = 0 and after 3 days based on updated_at 'I hope'
-                if (count($shopifyProduct->variants)==1 and $delete_on_shopify) {
+                if (count($shopifyProduct->variants) == 1 and $delete_on_shopify) {
                     if ($shopifyVariant->inventory_quantity == 0 and $shopifyVariant->inventory_management == 'shopify' and ($product->DeleteOnShopify == '0000-00-00' or $product->DeleteOnShopify == '')) {
                         $product->DeleteOnShopify = date('Y-m-d', strtotime($delete_on_shopify_after));
                     } elseif ($shopifyVariant->inventory_quantity > 0) {
@@ -379,7 +382,7 @@ class Product extends DataObject
         return DataObject::get_one(self::class, ['URLSegment' => $urlSegment]);
     }
 
-    public function URLEncode($url='')
+    public function URLEncode($url = '')
     {
         return urlencode($url);
     }
