@@ -31,10 +31,7 @@ class ShopifyExtension extends DataExtension
 
     /**
      * Import the shopify products
-<<<<<<< HEAD
      *
-=======
->>>>>>> master
      * @param Client $client
      *
      * @throws \Exception
@@ -47,14 +44,7 @@ class ShopifyExtension extends DataExtension
             exit($e->getMessage());
         }
 
-<<<<<<< HEAD
         if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
-=======
-        if (
-            ($products = $products->getBody()->getContents()) &&
-            ($products = Convert::json2obj($products))
-        ) {
->>>>>>> master
             foreach ($products->products as $shopifyProduct) {
                 $this->importProduct($shopifyProduct, $client);
             }
@@ -63,35 +53,20 @@ class ShopifyExtension extends DataExtension
 
     /**
      * Import the shopify products
-<<<<<<< HEAD
      *
-=======
->>>>>>> master
      * @param Client $client
      *
      * @throws \Exception
      */
     public function importProductsAll(Client $client)
     {
-<<<<<<< HEAD
         $methodUri = 'admin/api/' . $client->api_version . '/products.json?limit=250';
-=======
-        $methodUri =
-            'admin/api/' . $client->api_version . '/products.json?limit=250';
->>>>>>> master
 
         do {
             $products = $client->paginationCall($methodUri);
             $headerLink = $products->getHeader('Link');
 
-<<<<<<< HEAD
             if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
-=======
-            if (
-                ($products = $products->getBody()->getContents()) &&
-                ($products = Convert::json2obj($products))
-            ) {
->>>>>>> master
                 foreach ($products->products as $shopifyProduct) {
                     $this->importProduct($shopifyProduct, $client);
                 }
@@ -101,7 +76,6 @@ class ShopifyExtension extends DataExtension
         } while (!is_null($methodUri) && strlen($methodUri) > 0);
     }
 
-<<<<<<< HEAD
     /**
      * Import a shopify product
      *
@@ -118,19 +92,11 @@ class ShopifyExtension extends DataExtension
         }
     }
 
-=======
->>>>>>> master
     public function importProduct($shopifyProduct, $client = null)
     {
         $hide_if_no_image = Client::config()->get('hide_if_no_image');
         $delete_on_shopify = Client::config()->get('delete_on_shopify');
-<<<<<<< HEAD
         $delete_on_shopify_after = Client::config()->get('delete_on_shopify_after');
-=======
-        $delete_on_shopify_after = Client::config()->get(
-            'delete_on_shopify_after'
-        );
->>>>>>> master
 
         // Create the product
         if ($product = $this->importObject(Product::class, $shopifyProduct)) {
@@ -138,14 +104,7 @@ class ShopifyExtension extends DataExtension
             if ($hide_if_no_image and !$product->OriginalSrc) {
                 // Publish the product and it's connections
                 $product->publishRecursive();
-<<<<<<< HEAD
                 self::log("[{$product->ID}] Updated product {$product->Title}", self::SUCCESS);
-=======
-                self::log(
-                    "[{$product->ID}] Updated product {$product->Title}",
-                    self::SUCCESS
-                );
->>>>>>> master
             } else {
                 // If called from webhook, initiate $client & update connections
                 try {
@@ -158,14 +117,7 @@ class ShopifyExtension extends DataExtension
 
                 // Get Collects for custom_collections only
                 $currentcollections = $product->Collections();
-<<<<<<< HEAD
                 $allcollections = $this->importCollects($client, $shopifyProduct->id);
-=======
-                $allcollections = $this->importCollects(
-                    $client,
-                    $shopifyProduct->id
-                );
->>>>>>> master
 
                 // Remove any collections that have been deleted.
                 foreach ($currentcollections as $currentcollection) {
@@ -178,86 +130,40 @@ class ShopifyExtension extends DataExtension
 
                 if ($product->New) {
                     // Maybe do this???
-<<<<<<< HEAD
                     $this->importCollections($client, 'smart_collections', '-1 hour');
-=======
-                    $this->importCollections(
-                        $client,
-                        'smart_collections',
-                        '-1 hour'
-                    );
->>>>>>> master
                 }
 
                 // Publish the product and it's connections
                 $product->publishRecursive();
-<<<<<<< HEAD
                 self::log("[{$product->ID}] Updated product {$product->Title} and it's connections", self::SUCCESS);
             }
         } else {
             self::log("[{$shopifyProduct->id}] Could not create product", self::ERROR);
-=======
-                self::log(
-                    "[{$product->ID}] Updated product {$product->Title} and it's connections",
-                    self::SUCCESS
-                );
-            }
-        } else {
-            self::log(
-                "[{$shopifyProduct->id}] Could not create product",
-                self::ERROR
-            );
->>>>>>> master
         }
     }
 
     /**
      * Import the SHopify Collections
-<<<<<<< HEAD
      *
-=======
->>>>>>> master
      * @param Client $client
      *
      * @throws \SilverStripe\ORM\ValidationException
      */
-<<<<<<< HEAD
     public function importCollections(Client $client, $type, $updatedatmin = false)
     {
-=======
-    public function importCollections(
-        Client $client,
-        $type,
-        $updatedatmin = false
-    ) {
->>>>>>> master
         try {
             $collections = $client->collections($type);
         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
             exit($e->getMessage());
         }
 
-<<<<<<< HEAD
         if (($collections = $collections->getBody()->getContents()) && $collections = Convert::json2obj($collections)) {
             foreach ($collections->{$type} as $shopifyCollection) {
                 $this->importCollection($shopifyCollection, $client, $updatedatmin);
-=======
-        if (
-            ($collections = $collections->getBody()->getContents()) &&
-            ($collections = Convert::json2obj($collections))
-        ) {
-            foreach ($collections->{$type} as $shopifyCollection) {
-                $this->importCollection(
-                    $shopifyCollection,
-                    $client,
-                    $updatedatmin
-                );
->>>>>>> master
             }
         }
     }
 
-<<<<<<< HEAD
     public function importCollection($shopifyCollection, $client = null, $updatedatmin = false)
     {
         if ($shopifyCollection->published_scope == 'global' or $shopifyCollection->published_scope == 'web') {
@@ -266,30 +172,6 @@ class ShopifyExtension extends DataExtension
                 // Publish the product and it's connections
                 $collection->publishRecursive();
                 self::log("[{$collection->ID}] Published collection {$collection->Title} and it's connections", self::SUCCESS);
-=======
-    public function importCollection(
-        $shopifyCollection,
-        $client = null,
-        $updatedatmin = false
-    ) {
-        if (
-            $shopifyCollection->published_scope == 'global' or
-            $shopifyCollection->published_scope == 'web'
-        ) {
-            // Create the collection
-            if (
-                $collection = $this->importObject(
-                    Collection::class,
-                    $shopifyCollection
-                )
-            ) {
-                // Publish the product and it's connections
-                $collection->publishRecursive();
-                self::log(
-                    "[{$collection->ID}] Published collection {$collection->Title} and it's connections",
-                    self::SUCCESS
-                );
->>>>>>> master
 
                 if (!$client) {
                     // If called from webhook, initiate $client & update connections
@@ -305,41 +187,15 @@ class ShopifyExtension extends DataExtension
                 $currentproducts = $collection->Products();
                 $allproducts = [];
 
-<<<<<<< HEAD
                 $methodUri = 'admin/api/' . $client->api_version . '/products.json?collection_id=' . $collection->ShopifyID . '&limit=250' . ($updatedatmin ? ('&updated_at_min=' . date(DATE_ATOM, strtotime($updatedatmin))) : '');
-=======
-                $methodUri =
-                    'admin/api/' .
-                    $client->api_version .
-                    '/products.json?collection_id=' .
-                    $collection->ShopifyID .
-                    '&limit=250' .
-                    ($updatedatmin
-                        ? '&updated_at_min=' .
-                            date(DATE_ATOM, strtotime($updatedatmin))
-                        : '');
->>>>>>> master
 
                 do {
                     $products = $client->paginationCall($methodUri);
                     $headerLink = $products->getHeader('Link');
 
-<<<<<<< HEAD
                     if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
                         foreach ($products->products as $shopifyProduct) {
                             if ($product = Product::getByShopifyID($shopifyProduct->id)) {
-=======
-                    if (
-                        ($products = $products->getBody()->getContents()) &&
-                        ($products = Convert::json2obj($products))
-                    ) {
-                        foreach ($products->products as $shopifyProduct) {
-                            if (
-                                $product = Product::getByShopifyID(
-                                    $shopifyProduct->id
-                                )
-                            ) {
->>>>>>> master
                                 $collection->Products()->add($product);
 
                                 array_push($allproducts, $product->ID);
@@ -361,24 +217,14 @@ class ShopifyExtension extends DataExtension
 
                 $collection->write();
             } else {
-<<<<<<< HEAD
                 self::log("[{$shopifyCollection->id}] Could not create collection", self::ERROR);
-=======
-                self::log(
-                    "[{$shopifyCollection->id}] Could not create collection",
-                    self::ERROR
-                );
->>>>>>> master
             }
         }
     }
 
     /**
      * Import the Shopify Collects
-<<<<<<< HEAD
      *
-=======
->>>>>>> master
      * @param Client $client
      *
      * @throws \SilverStripe\ORM\ValidationException
@@ -393,7 +239,6 @@ class ShopifyExtension extends DataExtension
 
         $allcollections = [];
 
-<<<<<<< HEAD
         if (($collects = $collects->getBody()->getContents()) && $collects = Convert::json2obj($collects)) {
             foreach ($collects->collects as $shopifyCollect) {
                 if (($collection = Collection::getByShopifyID($shopifyCollect->collection_id))
@@ -408,31 +253,6 @@ class ShopifyExtension extends DataExtension
                         ]
                     );
                     self::log("[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]", self::SUCCESS);
-=======
-        if (
-            ($collects = $collects->getBody()->getContents()) &&
-            ($collects = Convert::json2obj($collects))
-        ) {
-            foreach ($collects->collects as $shopifyCollect) {
-                if (
-                    ($collection = Collection::getByShopifyID(
-                        $shopifyCollect->collection_id
-                    )) &&
-                    ($product = Product::getByShopifyID(
-                        $shopifyCollect->product_id
-                    ))
-                ) {
-                    $collection->Products()->add($product, [
-                        'ShopifyID' => $shopifyCollect->id,
-                        'SortValue' => $shopifyCollect->sort_value,
-                        'Position' => $shopifyCollect->position,
-                        'Featured' => $shopifyCollect->featured,
-                    ]);
-                    self::log(
-                        "[{$shopifyCollect->id}] Created collect between Product[{$product->ID}] and Collection[{$collection->ID}]",
-                        self::SUCCESS
-                    );
->>>>>>> master
 
                     array_push($allcollections, $collection->ID);
                 }
@@ -442,7 +262,6 @@ class ShopifyExtension extends DataExtension
         return $allcollections;
     }
 
-<<<<<<< HEAD
     /**
      * Import the shopify inventory_levels
      *
@@ -498,40 +317,18 @@ class ShopifyExtension extends DataExtension
         } while ($PreviousCount != $Count);
     }
 
-=======
->>>>>>> master
     public function methodUri($headerLink)
     {
         $methodUri = null;
         if (!is_null($headerLink) && count($headerLink) == 1) {
             $link = $headerLink[0];
 
-<<<<<<< HEAD
             if (strlen($link) > 0 && strpos($headerLink[0], '>; rel="next"') > 0) {
                 $strposrelnext = strpos($headerLink[0], '>; rel="next"');
                 if (strlen($link) > 0 && strpos($headerLink[0], '>; rel="previous"') > 0) {
                     $strposrelprev = strpos($headerLink[0], '>; rel="previous"');
 
                     $methodUri = trim(substr($headerLink[0], $strposrelprev + 20, -13));
-=======
-            if (
-                strlen($link) > 0 &&
-                strpos($headerLink[0], '>; rel="next"') > 0
-            ) {
-                $strposrelnext = strpos($headerLink[0], '>; rel="next"');
-                if (
-                    strlen($link) > 0 &&
-                    strpos($headerLink[0], '>; rel="previous"') > 0
-                ) {
-                    $strposrelprev = strpos(
-                        $headerLink[0],
-                        '>; rel="previous"'
-                    );
-
-                    $methodUri = trim(
-                        substr($headerLink[0], $strposrelprev + 20, -13)
-                    );
->>>>>>> master
                 } else {
                     $methodUri = trim(substr($headerLink[0], 1, -13));
                 }
@@ -544,13 +341,8 @@ class ShopifyExtension extends DataExtension
     /**
      * Import the base product
      *
-<<<<<<< HEAD
      * @param  Product|ProductVariant|Image|string $class
      * @param  $shopifyData
-=======
-     * @param Product|ProductVariant|Image|string $class
-     * @param $shopifyData
->>>>>>> master
      * @return null|Product|ProductVariant|Image
      */
     public function importObject($class, $shopifyData)
@@ -558,67 +350,32 @@ class ShopifyExtension extends DataExtension
         $object = null;
         try {
             $object = $class::findOrMakeFromShopifyData($shopifyData);
-<<<<<<< HEAD
             self::log("[{$object->ID}] Created {$class} {$object->Title}", self::SUCCESS);
-=======
-            self::log(
-                "[{$object->ID}] Created {$class} {$object->Title}",
-                self::SUCCESS
-            );
->>>>>>> master
         } catch (\Exception $e) {
             self::log($e->getMessage(), self::ERROR);
         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
             self::log("[Guzzle error] {$e->getMessage()}", self::ERROR);
         }
 
-<<<<<<< HEAD
         return $object;
     }
 
     public function deleteProducts($client)
     {
         if ($products = Product::get()->where("DeleteOnShopify <= CURDATE() AND DeleteOnShopify != '0000-00-00' AND DeleteOnShopify IS NOT NULL AND DeleteOnShopifyDone = 0")) {
-=======
-        $this->sleepByConfig();
-        return $object;
-    }
-
-    public function sleepByConfig()
-    {
-        $time = $this->owner->config()->sleep_microseconds_after_request;
-        if (isset($time) && is_numeric($time)) {
-            usleep($time);
-        }
-    }
-
-    public function deleteProducts($client)
-    {
-        if ($products = Product::get()->where('DeleteOnShopify=CURDATE()')) {
->>>>>>> master
             foreach ($products as $product) {
                 $product_id = $product->ShopifyID;
 
                 try {
                     $client->deleteProduct($product_id);
-<<<<<<< HEAD
 
                     $product->DeleteOnShopifyDone = 1;
                     $product->write();
-=======
->>>>>>> master
                 } catch (\GuzzleHttp\Exception\GuzzleException $e) {
                     exit($e->getMessage());
                 }
 
-<<<<<<< HEAD
                 self::log("[{$product->ID}] Deleted product '{$product->Title}'", self::SUCCESS);
-=======
-                self::log(
-                    "[{$product->ID}] Deleted product '{$product->Title}'",
-                    self::SUCCESS
-                );
->>>>>>> master
             }
         }
     }
