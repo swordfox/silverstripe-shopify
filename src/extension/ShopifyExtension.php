@@ -417,11 +417,7 @@ class ShopifyExtension extends DataExtension
         foreach ($map as $from => $to) {
             if (is_array($to) && is_object($data->{$from})) {
                 self::loop_map($to, $object, $data->{$from});
-<<<<<<< HEAD
             } elseif (isset($data->{$from}) && $value = $data->{$from}) {
-=======
-            } elseif (isset($data->{$from}) && ($value = $data->{$from})) {
->>>>>>> master
                 $object->{$to} = $value;
             }
         }
