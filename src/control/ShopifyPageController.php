@@ -183,7 +183,7 @@ class ShopifyPageController extends \PageController
         /**
          *      @var Product $Product
          */
-        if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment, 'Active' => 1])) {
+        if (!$Product = DataObject::get_one(Product::class, ['URLSegment' => $urlSegment, 'Active' => 1, 'Online' => 1])) {
             $this->httpError(404);
         }
 
