@@ -269,6 +269,7 @@ class Product extends DataObject
     {
         $delete_on_shopify = Client::config()->get('delete_on_shopify');
         $delete_on_shopify_after = Client::config()->get('delete_on_shopify_after');
+        $delete_on_shopify_keep_active = Client::config()->get('delete_on_shopify_keep_active');
 
         if (!$product = self::getByShopifyID($shopifyProduct->id)) {
             $product = self::create();
@@ -278,7 +279,9 @@ class Product extends DataObject
         }
 
         // Update the status
-        $product->Active = ($shopifyProduct->status == 'active' ? 1 : 0);
+        if (!$delete_on_shopify_keep_active or !$product->Active) {
+            $product->Active = ($shopifyProduct->status == 'active' ? 1 : 0);
+        }
 
         // Create the images
         if (!empty($shopifyProduct->images)) {

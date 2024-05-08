@@ -48,6 +48,7 @@ Swordfox\Shopify\Client:
     'inventory_levels/update': 'shop/webhook/update/inventory'
   delete_on_shopify: false
   delete_on_shopify_after: '+3 days' # strtotime('+3 days')
+  delete_on_shopify_keep_active: false
   hide_out_of_stock: false
   hide_if_no_image: false
   hide_if_collection_not_active: false
