@@ -321,8 +321,8 @@ class ShopifyPageController extends \PageController
 
         return $this->customise(
             array(
-                'GTIN' => $googlefeed_gtinbarcode ?: false,
-                'MPN' => $googlefeed_mpnsku ?: true, // Previously included by default
+                'GTIN' => $googlefeed_gtinbarcode,
+                'MPN' => $googlefeed_mpnsku,
                 'Condition' => $googlefeed_condition ?: 'new',
                 'Products' => $this->AllProducts($Paginated = false)
             )
