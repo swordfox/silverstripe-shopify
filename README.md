@@ -56,7 +56,7 @@ Swordfox\Shopify\Client:
   new_timeframe: '+7 days' # strtotime('+7 days')
   cron_interval: '-18 hours' # Allow for timezone offset, e.g. if your timezone is +12:00, add your cron_interval to that as a negative value. So if your cron runs every 6 hours, set the cron_interval to '-18 hours'
   custom_metafields: true # product.metafields.custom.metatitle & product.metafields.custom.brand
-  googlefeed_gtinbarcode: true # Show gtin as Barcode from Shopify
+  googlefeed_gtinbarcode: false # Show gtin as Barcode from Shopify
   googlefeed_mpnsku: true # Show mpn as SKU from Shopify
   googlefeed_condition: new # The condition of items
 
