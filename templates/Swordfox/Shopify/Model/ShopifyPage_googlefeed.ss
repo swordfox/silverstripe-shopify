@@ -13,7 +13,7 @@
             <g:description><% if Content %>$Content.Summary(100).XML<% else %>$Title.XML<% end_if %></g:description>
             <g:link>{$AbsoluteLink}</g:link>
             <g:image_link>$OriginalSrc</g:image_link>
-            <g:condition>used</g:condition>
+            <g:condition>$Up.Condition</g:condition>
             <g:availability>in stock</g:availability>
             <% with Variants.First %>
             <% if CompareAt %>
@@ -22,18 +22,22 @@
             <% else %>
             <g:price>$Price NZD</g:price>
             <% end_if %>
-            <% end_with %>
             <g:shipping>
                 <g:country>NZ</g:country>
                 <g:service>Standard</g:service>
                 <g:price>0 NZD</g:price>
             </g:shipping>
-
             <!-- 2 of the following 3 attributes are required fot this item according to the Unique Product Identifier Rules -->
-            <!--<g:gtin>$ShopifyID</g:gtin>-->
-            <!--<g:brand>WIW</g:brand>-->
+            <% if $Top.GTIN %>
+            <g:gtin>$Barcode</g:gtin>
+            <% end_if %>
+            <% if $Top.MPN %>
             <g:mpn>$SKU</g:mpn>
-
+            <% end_if %>
+            <% end_with %>
+            <% if Brand %>
+            <g:brand>$Brand</g:brand>
+            <% end_if %>
             <!-- The following attributes are not required for this item, but supplying them is recommended -->
             <!--<g:google_product_category>$Collections.First.Title.XML</g:google_product_category>-->
             <% if $ProductType %>

@@ -38,6 +38,8 @@ class ShopifyExtension extends DataExtension
      */
     public function importProducts(Client $client, $all = false, $since_id = 0)
     {
+        $custom_metafields = Client::config()->get('custom_metafields');
+
         try {
             $products = $client->products();
         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
@@ -46,6 +48,22 @@ class ShopifyExtension extends DataExtension
 
         if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
             foreach ($products->products as $shopifyProduct) {
+                if ($custom_metafields) {
+                    $productmetafields = $client->productmetafields($shopifyProduct->id);
+
+                    if (($productmetafields = $productmetafields->getBody()->getContents()) && $productmetafields = Convert::json2obj($productmetafields)) {
+                        if (count($productmetafields->metafields)) {
+                            foreach ($productmetafields->metafields as $metafield) {
+                                if ($metafield->namespace == 'custom' and $metafield->key == 'brand' and $metafield->value) {
+                                    $shopifyProduct->custom_brand = $metafield->value;
+                                } elseif ($metafield->namespace == 'custom' and $metafield->key == 'metatitle' and $metafield->value) {
+                                    $shopifyProduct->custom_metatitle = $metafield->value;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 $this->importProduct($shopifyProduct, $client);
             }
         }

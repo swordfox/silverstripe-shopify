@@ -315,8 +315,15 @@ class ShopifyPageController extends \PageController
 
     public function googlefeed()
     {
+        $googlefeed_gtinbarcode = Client::config()->get('googlefeed_gtinbarcode');
+        $googlefeed_mpnsku = Client::config()->get('googlefeed_mpnsku');
+        $googlefeed_condition = Client::config()->get('googlefeed_condition');
+
         return $this->customise(
             array(
+                'GTIN' => $googlefeed_gtinbarcode ?: false,
+                'MPN' => $googlefeed_mpnsku ?: false,
+                'Condition' => $googlefeed_condition ?: 'new',
                 'Products' => $this->AllProducts($Paginated = false)
             )
         );

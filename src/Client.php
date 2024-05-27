@@ -67,7 +67,7 @@ class Client
      */
     public function products()
     {
-        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products.json?limit='.$this->api_limit.'&updated_at_min='.date(DATE_ATOM, strtotime('-1 day')).'&order=updated_at+desc');
+        return $this->client->request('GET', 'admin/api/' . $this->api_version . '/products.json?limit=' . $this->api_limit . '&updated_at_min=' . date(DATE_ATOM, strtotime('-1 day')) . '&order=updated_at+desc');
     }
 
     /**
@@ -82,7 +82,22 @@ class Client
      */
     public function product($product_id)
     {
-        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json');
+        return $this->client->request('GET', 'admin/api/' . $this->api_version . '/products/' . $product_id . '.json');
+    }
+
+    /**
+     * Get information about a specific product
+     *
+     * @param string $productId
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function productmetafields($product_id)
+    {
+        return $this->client->request('GET', 'admin/api/' . $this->api_version . '/products/' . $product_id . '/metafields.json');
     }
 
     /**
@@ -95,21 +110,21 @@ class Client
      */
     public function locations()
     {
-        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/locations.json');
+        return $this->client->request('GET', 'admin/api/' . $this->api_version . '/locations.json');
     }
 
     public function deleteProduct($product_id)
     {
         $data = [
             'form_params' => [
-              "product" => [
-                "id" => $product_id,
-                "status" => "archived"
-              ]
+                "product" => [
+                    "id" => $product_id,
+                    "status" => "archived"
+                ]
             ]
         ];
 
-        return $this->client->request('PUT', 'admin/api/'.$this->api_version.'/products/'.$product_id.'.json', $data);
+        return $this->client->request('PUT', 'admin/api/' . $this->api_version . '/products/' . $product_id . '.json', $data);
     }
 
     /**
@@ -120,7 +135,7 @@ class Client
      */
     public function collections($type)
     {
-        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/'.$type.'.json?limit='.$this->api_limit);
+        return $this->client->request('GET', 'admin/api/' . $this->api_version . '/' . $type . '.json?limit=' . $this->api_limit);
     }
 
     /**
@@ -131,7 +146,7 @@ class Client
      */
     public function collects($product_id)
     {
-        return $this->client->request('GET', 'admin/collects.json?order=updated_at+desc&limit=250&product_id='.$product_id);
+        return $this->client->request('GET', 'admin/collects.json?order=updated_at+desc&limit=250&product_id=' . $product_id);
     }
 
     /**
@@ -153,7 +168,7 @@ class Client
      */
     public function createWebhook($data)
     {
-        return $this->client->request('POST', 'admin/api/'.$this->api_version.'/webhooks.json', $data);
+        return $this->client->request('POST', 'admin/api/' . $this->api_version . '/webhooks.json', $data);
     }
 
     /**
@@ -164,7 +179,7 @@ class Client
      */
     public function deleteWebhook($deleteid)
     {
-        return $this->client->request('DELETE', 'admin/api/'.$this->api_version.'/webhooks/'.$deleteid.'.json');
+        return $this->client->request('DELETE', 'admin/api/' . $this->api_version . '/webhooks/' . $deleteid . '.json');
     }
 
     /**
@@ -175,7 +190,7 @@ class Client
      */
     public function getWebhooks()
     {
-        return $this->client->request('GET', 'admin/api/'.$this->api_version.'/webhooks.json');
+        return $this->client->request('GET', 'admin/api/' . $this->api_version . '/webhooks.json');
     }
 
     /**
@@ -211,12 +226,12 @@ class Client
 
         $this->client = new \GuzzleHttp\Client(
             [
-            'base_uri' => "https://$domain",
-            'headers' => [
-                'Content-Type' => 'application/json; charset=utf-8',
-                'Authorization' => 'Basic ' . base64_encode("$key:$password")
-            ],
-            'verify' => false
+                'base_uri' => "https://$domain",
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=utf-8',
+                    'Authorization' => 'Basic ' . base64_encode("$key:$password")
+                ],
+                'verify' => false
             ]
         );
     }

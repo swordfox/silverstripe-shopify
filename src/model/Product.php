@@ -73,10 +73,12 @@ class Product extends DataObject
 
     private static $db = [
         'Title' => 'Varchar',
+        'MetaTitle' => 'Varchar',
         'URLSegment' => 'Varchar',
         'ShopifyID' => 'Varchar',
         'Content' => 'HTMLText',
         'Vendor' => 'Varchar',
+        'Brand' => 'Varchar',
         'ProductType' => 'Varchar',
         'Tags' => 'Varchar',
         'OriginalSrc' => 'Varchar',
@@ -97,6 +99,8 @@ class Product extends DataObject
         'handle' => 'URLSegment',
         'updated_at' => 'LastEdited',
         'tags' => 'Tags',
+        'custom_metatitle' => 'MetaTitle',
+        'custom_brand' => 'Brand',
     ];
 
     private static $has_many = [
@@ -166,10 +170,12 @@ class Product extends DataObject
             'Root.Main',
             [
                 ReadonlyField::create('Title'),
+                ReadonlyField::create('MetaTitle'),
                 ReadonlyField::create('URLSegment'),
                 ReadonlyField::create('ShopifyID'),
                 ReadonlyField::create('Content'),
                 ReadonlyField::create('Vendor'),
+                ReadonlyField::create('Brand'),
                 ReadonlyField::create('ProductType'),
                 ReadonlyField::create('OriginalSrc', 'Main Image'),
                 ReadonlyField::create('DeleteOnShopify'),
