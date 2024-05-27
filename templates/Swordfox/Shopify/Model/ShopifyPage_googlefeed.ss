@@ -33,6 +33,8 @@
             <% end_if %>
             <% if $Top.MPN %>
             <g:mpn>$SKU</g:mpn>
+            <% else %>
+            <g:mpn></g:mpn>
             <% end_if %>
             <% end_with %>
             <% if Brand %>
