@@ -172,6 +172,19 @@ class ShippingZone extends DataObject
             }
         }
 
+        if (!empty($shopifyShippingZone->price_based_shipping_rates)) {
+            foreach ($shopifyShippingZone->price_based_shipping_rates as $shopifyShippingRate) {
+                $shopifyShippingRate->type = 'PriceBased';
+                array_push($allrates, $shopifyShippingRate->id);
+
+                if (!$shippingRate = self::getByShopifyID($shopifyShippingRate->id)) {
+                    if ($shippingRate = $shippingZone->importObject(ShippingRate::class, $shopifyShippingRate)) {
+                        $shippingZone->ShippingRates()->add($shippingRate);
+                    }
+                }
+            }
+        }
+
         // Remove any rates that have been deleted.
         foreach ($currentrates as $currentrate) {
             if (!in_array($currentrate->ShopifyID, $allrates)) {

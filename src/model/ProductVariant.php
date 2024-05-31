@@ -160,7 +160,7 @@ class ProductVariant extends DataObject
     public function getShippingZonesFromWeight()
     {
         $cache = Injector::inst()->get(CacheInterface::class . '.shopify');
-        $cachekey = 'shopifyShipping' . $this->Weight;
+        $cachekey = 'shopifyShipping' . $this->Weight . '-' . $this->Price;
 
         //$cache->delete($cachekey);
 
@@ -170,7 +170,13 @@ class ProductVariant extends DataObject
             $ShippingZonesNew = new ArrayList();
 
             foreach ($ShippingZones as $ShippingZone) {
-                $ShippingRates = $ShippingZone->ShippingRates()->filter(['WeightLow:LessThanOrEqual' => $this->Weight, 'WeightHigh:GreaterThanOrEqual' => $this->Weight]);
+                $ShippingRatesWeightBased = $ShippingZone->ShippingRates()->filter(['Type' => 'WeightBased', 'WeightLow:LessThanOrEqual' => $this->Weight, 'WeightHigh:GreaterThanOrEqual' => $this->Weight]);
+                $ShippingRatesPriceBased = $ShippingZone->ShippingRates()->filter(['Type' => 'PriceBased'])->where("(MinOrderSubtotal <= '" . $this->Price . "' AND MaxOrderSubtotal >= '" . $this->Price . "') OR (MinOrderSubtotal = 0 AND MaxOrderSubtotal <= '" . $this->Price . "') OR (MinOrderSubtotal <= '" . $this->Price . "' AND MaxOrderSubtotal = 0)");
+
+                $ShippingRates = new ArrayList();
+
+                $ShippingRates->merge($ShippingRatesWeightBased);
+                $ShippingRates->merge($ShippingRatesPriceBased);
 
                 $ShippingCountries = $ShippingZone->ShippingCountries()->exclude(['Exclude' => 1]);
 

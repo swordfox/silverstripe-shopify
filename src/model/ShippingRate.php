@@ -55,6 +55,8 @@ class ShippingRate extends DataObject
         'Price' => 'Currency',
         'WeightLow' => 'Decimal(5,3)',
         'WeightHigh' => 'Decimal(5,3)',
+        'MinOrderSubtotal' => 'Currency',
+        'MaxOrderSubtotal' => 'Currency',
         'ShopifyShippingZoneID' => 'Varchar',
         'ShopifyID' => 'Varchar',
     ];
@@ -66,6 +68,8 @@ class ShippingRate extends DataObject
         'price' => 'Price',
         'weight_low' => 'WeightLow',
         'weight_high' => 'WeightHigh',
+        'min_order_subtotal' => 'MinOrderSubtotal',
+        'max_order_subtotal' => 'MaxOrderSubtotal',
         'shipping_zone_id' => 'ShopifyShippingZoneID',
     ];
 

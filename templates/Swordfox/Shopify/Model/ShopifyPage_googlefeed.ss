@@ -24,20 +24,20 @@
             <% end_if %>
             <% if Weight && WeightUnit %>
                 <g:shipping_weight>$Weight $WeightUnit</g:shipping_weight>
-                <% loop $ShippingZonesFromWeight %>
-                    <% loop $Me.ShippingCountriesNew %>       
-                        <% if $ShippingRates.count > 0 %>
-                            <% loop $ShippingRates %>
-                            <g:shipping>
-                                <g:country>$Up.Code</g:country>
-                                <g:service>$Name</g:service>
-                                <g:price>$Price $Top.Currency</g:price>
-                            </g:shipping>
-                            <% end_loop %>
-                        <% end_if %>
-                    <% end_loop %>
-                <% end_loop %>
             <% end_if %>
+            <% loop $ShippingZonesFromWeight %>
+                <% loop $Me.ShippingCountriesNew %>       
+                    <% if $ShippingRates.count > 0 %>
+                        <% loop $ShippingRates %>
+                        <g:shipping>
+                            <g:country>$Up.Code</g:country>
+                            <g:service>$Name</g:service>
+                            <g:price>$Price $Top.Currency</g:price>
+                        </g:shipping>
+                        <% end_loop %>
+                    <% end_if %>
+                <% end_loop %>
+            <% end_loop %>            
             <!-- 2 of the following 3 attributes are required fot this item according to the Unique Product Identifier Rules -->
             <% if $Top.GTIN %>
             <g:gtin>$Barcode</g:gtin>
