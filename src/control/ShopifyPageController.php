@@ -10,6 +10,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\View\ArrayData;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\Core\Convert;
+use SilverStripe\SiteConfig\SiteConfig;
 
 use Swordfox\Shopify\Client;
 
@@ -315,16 +316,20 @@ class ShopifyPageController extends \PageController
 
     public function googlefeed()
     {
+        $config = SiteConfig::current_site_config();
+
+        $currency = $config->ShopifyCurrency;
         $googlefeed_gtinbarcode = Client::config()->get('googlefeed_gtinbarcode');
         $googlefeed_mpnsku = Client::config()->get('googlefeed_mpnsku');
         $googlefeed_condition = Client::config()->get('googlefeed_condition');
 
         return $this->customise(
             array(
+                'Currency' => $currency,
                 'GTIN' => $googlefeed_gtinbarcode,
                 'MPN' => $googlefeed_mpnsku,
                 'Condition' => $googlefeed_condition ?: 'new',
-                'Products' => $this->AllProducts($Paginated = false)
+                'Products' => $this->AllProducts($Paginated = false),
             )
         );
     }

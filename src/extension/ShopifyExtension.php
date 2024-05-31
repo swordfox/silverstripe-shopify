@@ -12,6 +12,8 @@ use Swordfox\Shopify\Model\ShopifyImage;
 use Swordfox\Shopify\Model\Product;
 use Swordfox\Shopify\Model\ProductVariant;
 use Swordfox\Shopify\Model\ProductTag;
+use Swordfox\Shopify\Model\ShippingZone;
+use Swordfox\Shopify\Model\ShippingCountry;
 
 /**
  * Class ShopifyExtension
@@ -161,7 +163,7 @@ class ShopifyExtension extends DataExtension
     }
 
     /**
-     * Import the SHopify Collections
+     * Import the Shopify Collections
      *
      * @param Client $client
      *
@@ -239,6 +241,24 @@ class ShopifyExtension extends DataExtension
             }
         }
     }
+
+    public function importShippingZone($shopifyShippingZone, $client = null)
+    {
+
+        // Create the collection
+        if ($shippingZone = $this->importObject(ShippingZone::class, $shopifyShippingZone)) {
+            // Publish the product and it's connections
+            $shippingZone->publishRecursive();
+            self::log("[{$shippingZone->ID}] Published shippingZone {$shippingZone->Name}", self::SUCCESS);
+
+            $shippingZone->write();
+
+            return $shippingZone;
+        } else {
+            self::log("[{$shopifyShippingZone->id}] Could not create shipping zone", self::ERROR);
+        }
+    }
+
 
     /**
      * Import the Shopify Collects
@@ -333,6 +353,43 @@ class ShopifyExtension extends DataExtension
                 //$methodUri = $this->methodUri($headerLink);
             }
         } while ($PreviousCount != $Count);
+    }
+
+    /**
+     * Import the shopify shipping_zones
+     *
+     * @param Client $client
+     *
+     * @throws \Exception
+     */
+    public function updateShipping(Client $client)
+    {
+        $currentShippingZones = ShippingZone::get();
+        $activeShippingZones = [];
+
+        $methodUri = 'admin/api/' . $client->api_version . '/shipping_zones.json';
+
+        do {
+            $shippingZones = $client->paginationCall($methodUri);
+            $headerLink = $shippingZones->getHeader('Link');
+
+            if (($shippingZones = $shippingZones->getBody()->getContents()) && $shippingZones = Convert::json2obj($shippingZones)) {
+                //print_r($shippingZones);
+                foreach ($shippingZones->shipping_zones as $shippingZone) {
+                    $activeShippingZone = $this->importShippingZone($shippingZone, $client);
+                    $activeShippingZones[] = $activeShippingZone->ID;
+                }
+            }
+
+            $methodUri = $this->methodUri($headerLink);
+        } while (!is_null($methodUri) && strlen($methodUri) > 0);
+
+        // Remove Shipping Zones that no longer exist.
+        foreach ($currentShippingZones as $currentShippingZone) {
+            if (!in_array($currentShippingZone->ID, $activeShippingZones)) {
+                $currentShippingZone->delete();
+            }
+        }
     }
 
     public function methodUri($headerLink)

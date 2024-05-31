@@ -13,20 +13,31 @@
             <g:description><% if Content %>$Content.Summary(100).XML<% else %>$Title.XML<% end_if %></g:description>
             <g:link>{$AbsoluteLink}</g:link>
             <g:image_link>$OriginalSrc</g:image_link>
-            <g:condition>$Up.Condition</g:condition>
+            <g:condition>$Top.Condition</g:condition>
             <g:availability>in stock</g:availability>
             <% with Variants.First %>
             <% if CompareAt %>
-            <g:price>$CompareAt NZD</g:price>
-            <g:sale_price>$Price NZD</g:sale_price>
+            <g:price>$CompareAt $Top.Currency</g:price>
+            <g:sale_price>$Price $Top.Currency</g:sale_price>
             <% else %>
-            <g:price>$Price NZD</g:price>
+            <g:price>$Price $Top.Currency</g:price>
             <% end_if %>
-            <g:shipping>
-                <g:country>NZ</g:country>
-                <g:service>Standard</g:service>
-                <g:price>0 NZD</g:price>
-            </g:shipping>
+            <% if Weight && WeightUnit %>
+                <g:shipping_weight>$Weight $WeightUnit</g:shipping_weight>
+                <% loop $ShippingZonesFromWeight %>
+                    <% loop $Me.ShippingCountriesNew %>       
+                        <% if $ShippingRates.count > 0 %>
+                            <% loop $ShippingRates %>
+                            <g:shipping>
+                                <g:country>$Up.Code</g:country>
+                                <g:service>$Name</g:service>
+                                <g:price>$Price $Top.Currency</g:price>
+                            </g:shipping>
+                            <% end_loop %>
+                        <% end_if %>
+                    <% end_loop %>
+                <% end_loop %>
+            <% end_if %>
             <!-- 2 of the following 3 attributes are required fot this item according to the Unique Product Identifier Rules -->
             <% if $Top.GTIN %>
             <g:gtin>$Barcode</g:gtin>

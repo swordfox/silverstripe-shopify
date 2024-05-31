@@ -2,6 +2,10 @@
 Name: shopify
 ---
 
+Silverstripe\SiteConfig\SiteConfig:
+  extensions:
+    - Swordfox\Shopify\SiteConfig\ShopifySiteConfig
+
 Swordfox\Shopify\Model\ShopifyPageController:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
@@ -19,6 +23,19 @@ Swordfox\Shopify\Task\InventoryLocation:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
 
+Swordfox\Shopify\Task\ShopifyShipping:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension
+
+Swordfox\Shopify\Model\ShippingZone:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension
+
+Swordfox\Shopify\Model\ShippingCountry:
+  extensions:
+    - Swordfox\Shopify\Extension\ShopifyExtension    
+
 Swordfox\Shopify\Model\Product:
   extensions:
     - Swordfox\Shopify\Extension\ShopifyExtension
+    

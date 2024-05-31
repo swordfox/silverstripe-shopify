@@ -1,0 +1,11 @@
+---
+Name: shopifycache
+After: '#corecache'
+---
+
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.shopify:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "shopify"
+      defaultLifetime: 60

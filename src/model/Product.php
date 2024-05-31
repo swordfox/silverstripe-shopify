@@ -50,8 +50,6 @@ class Product extends DataObject
 {
     private static $table_name = 'ShopifyProduct';
 
-    private static $currency = 'NZD';
-
     private static $default_sort = 'Created DESC';
 
     private static $options = [

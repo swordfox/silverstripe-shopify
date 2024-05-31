@@ -5,6 +5,8 @@ namespace Swordfox\Shopify\Admin;
 use SilverStripe\Admin\ModelAdmin;
 use Swordfox\Shopify\Model\Product;
 use Swordfox\Shopify\Model\Collection;
+use Swordfox\Shopify\Model\ShippingZone;
+use Swordfox\Shopify\Model\ShippingCountry;
 
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldImportButton;
@@ -24,7 +26,9 @@ class ProductAdmin extends ModelAdmin
 {
     private static $managed_models = [
         Collection::class,
-        Product::class
+        Product::class,
+        ShippingZone::class,
+        ShippingCountry::class,
     ];
 
     private static $url_segment = 'shopify';
@@ -46,7 +50,7 @@ class ProductAdmin extends ModelAdmin
         $config->removeComponentsByType(GridFieldDeleteAction::class);
 
         // Remove export and print buttons
-        //$config->removeComponentsByType(GridFieldAddNewButton::class);
+        $config->removeComponentsByType(GridFieldAddNewButton::class);
         $config->removeComponentsByType(GridFieldImportButton::class);
         $config->removeComponentsByType(GridFieldPrintButton::class);
 

@@ -2,10 +2,13 @@
 
 namespace Swordfox\Shopify\Model;
 
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\ORM\DataObject;
-//use SilverStripe\Versioned\Versioned;
+use Psr\SimpleCache\CacheInterface;
+use SilverStripe\Core\Injector\Injector;
 use Swordfox\Shopify\Task\Import;
+use Swordfox\Shopify\Model\ShippingZone;
 
 /**
  * Class ProductVariant
@@ -63,11 +66,11 @@ class ProductVariant extends DataObject
     private static $default_sort = 'Sort';
 
     private static $data_map = [
-        'id'=> 'ShopifyID',
-        'title'=> 'Title',
-        'price'=> 'Price',
+        'id' => 'ShopifyID',
+        'title' => 'Title',
+        'price' => 'Price',
         'compare_at_price' => 'CompareAt',
-        'sku'=> 'SKU',
+        'sku' => 'SKU',
         'position' => 'Sort',
         'option1' => 'Option1',
         'option2' => 'Option2',
@@ -152,6 +155,40 @@ class ProductVariant extends DataObject
     public static function getByShopifyID($shopifyId)
     {
         return DataObject::get_one(self::class, ['ShopifyID' => $shopifyId]);
+    }
+
+    public function getShippingZonesFromWeight()
+    {
+        $cache = Injector::inst()->get(CacheInterface::class . '.shopify');
+        $cachekey = 'shopifyShipping' . $this->Weight;
+
+        //$cache->delete($cachekey);
+
+        if (!$ShippingZonesNew = $cache->get($cachekey)) {
+            $ShippingZones = ShippingZone::get()->exclude(['Exclude' => 1]);
+
+            $ShippingZonesNew = new ArrayList();
+
+            foreach ($ShippingZones as $ShippingZone) {
+                $ShippingRates = $ShippingZone->ShippingRates()->filter(['WeightLow:LessThanOrEqual' => $this->Weight, 'WeightHigh:GreaterThanOrEqual' => $this->Weight]);
+
+                $ShippingCountries = $ShippingZone->ShippingCountries()->exclude(['Exclude' => 1]);
+
+                $ShippingCountriesNew = new ArrayList();
+                foreach ($ShippingCountries as $ShippingCountry) {
+                    $ShippingCountry->ShippingRates = $ShippingRates;
+                    $ShippingCountriesNew->push($ShippingCountry);
+                }
+
+                $ShippingZone->ShippingCountriesNew = $ShippingCountriesNew;
+
+                $ShippingZonesNew->push($ShippingZone);
+            }
+
+            $cache->set($cachekey, $ShippingZonesNew);
+        }
+
+        return $ShippingZonesNew;
     }
 
     public function canView($member = null)
