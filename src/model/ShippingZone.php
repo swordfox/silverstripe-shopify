@@ -129,8 +129,6 @@ class ShippingZone extends DataObject
             $shippingZone = self::create();
         }
 
-        print_r($shopifyShippingZone);
-
         // Create the countries
         $currentcountries = $shippingZone->ShippingCountries();
         $allcountries = [];
