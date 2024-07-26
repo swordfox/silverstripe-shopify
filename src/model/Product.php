@@ -214,7 +214,9 @@ class Product extends DataObject
     {
         $Variant = $this->Variants()->first();
 
-        if ($Variant->Inventory > 0) {
+        if ($this->Status == 'archived') {
+            return 'Sold';
+        } elseif ($Variant->Inventory > 0) {
             return '$' . number_format($Variant->Price, $decimals) . ($Variant->CompareAt ? (' <del>$' . number_format($Variant->CompareAt, $decimals) . '</del>') : '');
         } elseif ($this->ProductType == 'Gift Card') {
             return '';
