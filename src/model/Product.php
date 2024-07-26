@@ -84,7 +84,8 @@ class Product extends DataObject
         'DeleteOnShopifyDone' => 'Boolean',
         'ImageAdded' => 'DBDatetime',
         'Active' => 'Boolean(1)',
-        'Online' => 'Boolean(1)'
+        'Online' => 'Boolean(1)',
+        'Status' => 'Varchar',
     ];
 
     private static $data_map = [
@@ -97,6 +98,7 @@ class Product extends DataObject
         'handle' => 'URLSegment',
         'updated_at' => 'LastEdited',
         'tags' => 'Tags',
+        'status' => 'Status',
         'custom_metatitle' => 'MetaTitle',
         'custom_brand' => 'Brand',
     ];
