@@ -15,7 +15,7 @@
             <g:image_link>$OriginalSrc</g:image_link>
             <g:condition>$Top.Condition</g:condition>
             <% with Variants.First %>
-            <g:availability><% if Inventory > 3 %>In_stock<% else_if Inventory > 0 %>Limited_stock<% else %>Out_of_stock<% end_if %></g:availability>
+            <g:availability><% if Inventory > 0 %>in_stock<% else %>out_of_stock<% end_if %></g:availability>
             <% if CompareAt %>
             <g:price>$CompareAt $Top.Currency</g:price>
             <g:sale_price>$Price $Top.Currency</g:sale_price>
