@@ -103,7 +103,9 @@ class Webhooks extends BuildTask
             exit($e->getMessage());
         }
 
-        if (($webhooks = $response->getBody()->getContents()) && $webhooks = Convert::json2obj($webhooks)) {
+        $webhooksBody = $response->getBody()->getContents();
+
+        if ($webhooks = json_decode($webhooksBody)) {
             echo '<h2>Webhooks</h2>';
             echo '<ul>';
             foreach ($webhooks->webhooks as $webhook) {
