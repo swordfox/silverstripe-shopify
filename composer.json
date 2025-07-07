@@ -12,11 +12,11 @@
         }
     ],
 	"require": {
-		"silverstripe/framework": "4.x",
-		"silverstripe/cms": "4.x",
+		"silverstripe/framework": "^4 || ^5",
+		"silverstripe/cms": "^4 || ^5",
 		"composer/installers": "*",
 		"guzzlehttp/guzzle": "*",
-		"symbiote/silverstripe-gridfieldextensions": "^3"
+		"symbiote/silverstripe-gridfieldextensions": "^3 || ^4"
 	},
     "extra": {
         "expose": [

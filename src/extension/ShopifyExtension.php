@@ -3,7 +3,7 @@
 namespace Swordfox\Shopify\Extension;
 
 use SilverStripe\Core\Convert;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\ORM\FieldType\DBCurrency;
 use SilverStripe\View\Requirements;
 use Swordfox\Shopify\Client;
@@ -24,7 +24,7 @@ use Swordfox\Shopify\Model\ShippingCountry;
  * @property ShopifyExtension|\PageController $owner
  */
 
-class ShopifyExtension extends DataExtension
+class ShopifyExtension extends Extension
 {
     const NOTICE = 0;
     const SUCCESS = 1;
@@ -48,12 +48,16 @@ class ShopifyExtension extends DataExtension
             exit($e->getMessage());
         }
 
-        if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+        $body = $products->getBody()->getContents();
+
+        if ($body && ($products = json_decode($body))) {
             foreach ($products->products as $shopifyProduct) {
                 if ($custom_metafields) {
                     $productmetafields = $client->productmetafields($shopifyProduct->id);
 
-                    if (($productmetafields = $productmetafields->getBody()->getContents()) && $productmetafields = Convert::json2obj($productmetafields)) {
+                    $productMetaBody = $productmetafields->getBody()->getContents();
+
+                    if ($productmetafields = json_decode($productMetaBody)) {
                         if (count($productmetafields->metafields)) {
                             foreach ($productmetafields->metafields as $metafield) {
                                 if ($metafield->namespace == 'custom' and $metafield->key == 'brand' and $metafield->value) {
@@ -86,7 +90,9 @@ class ShopifyExtension extends DataExtension
             $products = $client->paginationCall($methodUri);
             $headerLink = $products->getHeader('Link');
 
-            if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+            $body = $products->getBody()->getContents();
+
+            if ($products = json_decode($body)) {
                 foreach ($products->products as $shopifyProduct) {
                     $this->importProduct($shopifyProduct, $client);
                 }
@@ -107,7 +113,9 @@ class ShopifyExtension extends DataExtension
     {
         $product = $client->product($product_id);
 
-        if (($product = $product->getBody()->getContents()) && $product = Convert::json2obj($product)) {
+        $body = $product->getBody()->getContents();
+
+        if ($product = json_decode($body)) {
             $this->importProduct($product->product, $client);
         }
     }
@@ -177,7 +185,9 @@ class ShopifyExtension extends DataExtension
             exit($e->getMessage());
         }
 
-        if (($collections = $collections->getBody()->getContents()) && $collections = Convert::json2obj($collections)) {
+        $body = $collections->getBody()->getContents();
+
+        if ($body && ($collections = json_decode($body))) {
             foreach ($collections->{$type} as $shopifyCollection) {
                 $this->importCollection($shopifyCollection, $client, $updatedatmin);
             }
@@ -213,7 +223,9 @@ class ShopifyExtension extends DataExtension
                     $products = $client->paginationCall($methodUri);
                     $headerLink = $products->getHeader('Link');
 
-                    if (($products = $products->getBody()->getContents()) && $products = Convert::json2obj($products)) {
+                    $productsBody = $products->getBody()->getContents();
+
+                    if ($products = json_decode($productsBody)) {
                         foreach ($products->products as $shopifyProduct) {
                             if ($product = Product::getByShopifyID($shopifyProduct->id)) {
                                 $collection->Products()->add($product);
@@ -277,7 +289,9 @@ class ShopifyExtension extends DataExtension
 
         $allcollections = [];
 
-        if (($collects = $collects->getBody()->getContents()) && $collects = Convert::json2obj($collects)) {
+        $body = $collects->getBody()->getContents();
+
+        if ($body && ($collects = json_decode($body))) {
             foreach ($collects->collects as $shopifyCollect) {
                 if (($collection = Collection::getByShopifyID($shopifyCollect->collection_id))
                     && ($product = Product::getByShopifyID($shopifyCollect->product_id))
@@ -339,8 +353,9 @@ class ShopifyExtension extends DataExtension
                 $inventory_levels = $client->paginationCall($methodUri);
                 //$headerLink = $inventory_levels->getHeader('Link');
 
-                if (($inventory_levels = $inventory_levels->getBody()->getContents()) && $inventory_levels = Convert::json2obj($inventory_levels)) {
-                    foreach ($inventory_levels->inventory_levels as $inventory_level) {
+                $inventory_levelsBody = $inventory_levels->getBody()->getContents();
+
+                if ($inventory_levels = json_decode($inventory_levelsBody)) {                    foreach ($inventory_levels->inventory_levels as $inventory_level) {
                         if ($ProductVariant = ProductVariant::get()->filter(['InventoryItemID' => $inventory_level->inventory_item_id])->first() and $inventory_level->available > 0) {
                             $ProductVariant->Location = $inventory_level->location_id;
                             $ProductVariant->write();
@@ -373,7 +388,9 @@ class ShopifyExtension extends DataExtension
             $shippingZones = $client->paginationCall($methodUri);
             $headerLink = $shippingZones->getHeader('Link');
 
-            if (($shippingZones = $shippingZones->getBody()->getContents()) && $shippingZones = Convert::json2obj($shippingZones)) {
+            $shippingZonesBody = $shippingZones->getBody()->getContents();
+
+            if ($shippingZones = json_decode($shippingZonesBody)) {
                 //print_r($shippingZones);
                 foreach ($shippingZones->shipping_zones as $shippingZone) {
                     $activeShippingZone = $this->importShippingZone($shippingZone, $client);
