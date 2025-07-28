@@ -59,6 +59,7 @@ Swordfox\Shopify\Client:
   googlefeed_gtinbarcode: false # Show gtin as Barcode from Shopify
   googlefeed_mpnsku: true # Show mpn as SKU from Shopify
   googlefeed_condition: new # The condition of items
+  googlefeed_storecode: 'code' # Show store_code in feed, e.g. Queenstown
 
 # Override $default_sort
 Swordfox\Shopify\Model\Product:

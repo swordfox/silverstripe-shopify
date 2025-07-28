@@ -51,6 +51,9 @@
             <% if Brand %>
             <g:brand>$Brand</g:brand>
             <% end_if %>
+            <% if StoreCode %>
+            <g:store_code>$StoreCode</g:store_code>
+            <% end_if %>
             <!-- The following attributes are not required for this item, but supplying them is recommended -->
             <!--<g:google_product_category>$Collections.First.Title.XML</g:google_product_category>-->
             <% if $ProductType %>
